@@ -1,0 +1,74 @@
+#include <cstdio>
+#include <cstdlib>
+#include <iostream>
+
+std::string const USAGE = "Program requires exactly two arguments, both positive integers.\n";
+
+// desc: Reports incorrect command-line usage and exits with status 1
+//  pre: None
+// post: In description
+void bad_usage() {
+    std::cerr << USAGE;
+    std::exit(1);
+}
+
+// desc: Returns the value and thread counts provided by the supplied
+//       command-line arguments.
+//  pre: There should be exactly two arguments, both positive integers.
+//       If this precondition is not met, the program will exit with
+//       status 1
+// post: In description
+void get_args(int argc, char *argv[], int &val_count, int &thread_count) {
+
+    if (argc <= 2) {
+        bad_usage();
+    } else if (argc >= 4) {
+        bad_usage();
+    }
+
+    val_count    = 0;
+    thread_count = 0;
+
+    val_count    = atoi(argv[1]);
+    thread_count = atoi(argv[2]);
+
+    if ((val_count <= 0) || (thread_count <= 0)) {
+        bad_usage();
+    }
+}
+
+// desc: returns an array of `count` integers filled with
+//       random values
+//  pre: `count` should be positive
+// post: In description
+int *random_array(int count) {
+    int *result = new int[count];
+    for (int i = 0; i < count; i++) {
+        result[i] = rand();
+    }
+    return result;
+}
+
+// desc: Calculates the element-wise multiplication and
+//       addition of three arrays (A * B + C)
+//  pre: Command-line arguments should consist of exactly
+//       two arguments, both positive integers
+// post: In description
+int main(int argc, char *argv[]) {
+
+    int val_count, thread_count;
+    get_args(argc, argv, val_count, thread_count);
+
+    std::cout << "Value count is  : " << val_count << '\n';
+    std::cout << "Thread count is : " << thread_count << '\n';
+
+    int *a = random_array(val_count);
+    int *b = random_array(val_count);
+    int *c = random_array(val_count);
+
+    for (int i = 0; i < val_count; i++) {
+        c[i] = a[i] * b[i] + c[i];
+    }
+
+    return 0;
+}
