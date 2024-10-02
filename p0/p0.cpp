@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <omp.h>
 
 std::string const USAGE = "Program requires exactly two arguments, both positive integers.\n";
 
@@ -56,6 +57,14 @@ int *random_array(int count) {
 // post: In description
 int main(int argc, char *argv[]) {
 
+    // A simple C++ program that uses OpenMP to set the number of threads and parallelize a loop:
+    // - omp_set_num_threads(4); sets the number of threads to 4.
+    // - #pragma omp parallel for is the directive that tells OpenMP to parallelize the following `for` loop.
+    // - omp_get_thread_num() returns the ID of the thread executing the current iteration of the loop.
+
+    // Set the number of threads
+    omp_set_num_threads(4);
+
     int val_count, thread_count;
     get_args(argc, argv, val_count, thread_count);
 
@@ -69,6 +78,14 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < val_count; i++) {
         c[i] = a[i] * b[i] + c[i];
     }
+
+    // Parallelize this loop
+    // #pragma omp parallel for
+    // for (int i = 0; i < val_count; ++i) {
+    //     int thread_id = omp_get_thread_num();
+    //     std::cout << "Thread " << thread_id << " is processing iteration " << i << std::endl;
+    //     c[i] = a[i] * b[i] + c[i];
+    // }
 
     return 0;
 }
