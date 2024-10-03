@@ -1,8 +1,8 @@
 import subprocess
 import math
 
-add_counts = [ 10, 20, 40, 80, 160, 320, 640 ]
-mul_counts = [ 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024 ]
+add_counts = [ 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000 ]
+mul_counts = [ 1, 2, 3, 4, 5, 6, 7, 8 ]
 
 sample_count = 10
 
