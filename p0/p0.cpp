@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
     // The number of threads should be set to the value of the second command-line argument.
     // The number of iterations should be set to the value of the first command-line argument.
     // The loop should be parallelized using OpenMP.
-    // #pragma omp parallel for
+    #pragma omp parallel for
     for (int i = 0; i < val_count; i++) {
         c[i] = a[i] * b[i] + c[i];
     }
