@@ -59,15 +59,6 @@ int *random_array(int count) {
     return result;
 }
 
-// class Worker {
-// public:
-//     void operator()(int id, void *sharedData) {
-//         std::cout << "Thread " << id << " is processing" << std::endl;
-//         std::string *data = static_cast<std::string *>(sharedData);
-//         std::cout << "Thread " << id << " received data: " << *data << std::endl;
-//     }
-// }
-
 // desc: Calculates the element-wise multiplication and
 //       addition of three arrays (A * B + C)
 //  pre: Command-line arguments should consist of exactly
@@ -97,7 +88,7 @@ int main(int argc, char *argv[]) {
     // The number of threads should be set to the value of the second command-line argument.
     // The number of iterations should be set to the value of the first command-line argument.
     // The loop should be parallelized using OpenMP.
-    #pragma omp parallel for
+    // #pragma omp parallel for
     for (int i = 0; i < val_count; i++) {
         c[i] = a[i] * b[i] + c[i];
     }
