@@ -12,11 +12,15 @@ void printy(std::string name) {
 }
 
 int main() {
-    std::thread t1(printy, "thread1");
-    std::thread t2(printy, "thread2");
-
-    t1.join();
-    t2.join();
+    size_t TEAM_SIZE = 10;
+    std::thread team[TEAM_SIZE];
+    for (size_t i = 0; i < TEAM_SIZE; i++) {
+        team[i] = std::thread(printy, "thread" + std::to_string(i));
+    }
+    
+    for (size_t i = 0; i < TEAM_SIZE; i++) {
+        team[i].join();
+    }
 
     return 0;
 }
