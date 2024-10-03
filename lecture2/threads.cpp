@@ -2,7 +2,8 @@
 #include <thread>
 #include <chrono>
 #include <string>
-
+// g++ threads.cpp -o threads -lpthread
+// ./threads
 void printy(std::string name) {
     for (int i = 0; i < 5; i++) {
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
