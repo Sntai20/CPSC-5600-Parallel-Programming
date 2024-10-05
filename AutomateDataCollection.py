@@ -2,10 +2,8 @@ import argparse
 import subprocess
 import math
 
-# add_counts = [ 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000 ]
-# mul_counts = [ 1, 2, 3, 4, 5, 6, 7, 8 ]
-add_counts = [ 10, 100, 1000, 10000, 100000 ]
-mul_counts = [ 1, 2, 3, 4, 5 ]
+add_counts = [ 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000 ]
+mul_counts = [ 1, 2, 3, 4, 5, 6, 7, 8 ]
 
 sample_count = 10
 
@@ -13,18 +11,19 @@ sample_count = 10
 def main():
     parser = argparse.ArgumentParser(description="A script with a nosample switch")
     parser.add_argument('--nosample', action='store_true', help='Disable sampling')
-    parser.add_argument('input_string', type=str, help='Input string to process')
+    parser.add_argument('project_name', type=str, help='Input project name string where the program is in')
+    parser.add_argument('program_name', type=str, help='Input program name string to process')
     
     args = parser.parse_args()
-    
+    print(f"Project name: {args.project_name}")
+    print(f"Program name: {args.program_name}")
     if args.nosample:
         print("Sampling is disabled.")
-        print(f"Program name: {args.input_string}")
         for i in add_counts:
             for j in mul_counts:
                 minimum = math.inf
                 for k in range(sample_count):
-                    cmd = [ f"out/{args.input_string}", str(i), str(j) ]
+                    cmd = [ f"{args.project_name}/out/{args.program_name}", str(i), str(j) ]
                     output_str = subprocess \
                         .run(cmd,stdout=subprocess.PIPE) \
                         .stdout.decode('utf-8')
@@ -36,10 +35,9 @@ def main():
             print()
     else:
         print("Sampling is enabled.")
-        print(f"Program name: {args.input_string}")
         for i in add_counts:
             for j in mul_counts:
-                cmd = [ f"out/{args.input_string}", str(i), str(j) ]
+                cmd = [ f"{args.project_name}/out/{args.program_name}", str(i), str(j) ]
                 output_str = subprocess \
                     .run(cmd,stdout=subprocess.PIPE) \
                     .stdout.decode('utf-8')
