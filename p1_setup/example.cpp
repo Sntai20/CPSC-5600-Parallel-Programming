@@ -8,8 +8,8 @@ using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 using std::chrono::steady_clock;
 using std::this_thread::sleep_for;
-using TimePoint         = std::chrono::steady_clock::time_point;
-using TimeSpan          = std::chrono::duration<double>;
+using TimePoint = std::chrono::steady_clock::time_point;
+using TimeSpan = std::chrono::duration<double>;
 
 std::string const USAGE = "Program requires exactly two arguments, both positive integers.\n";
 
@@ -121,8 +121,8 @@ int main(int argc, char *argv[]) {
     int value_count, thread_count;
     get_args(argc, argv, value_count, thread_count);
 
-    std::cout << "Value count is  : " << value_count << '\n';
-    std::cout << "Thread count is : " << thread_count << '\n';
+    // std::cout << "Value count is  : " << value_count << '\n';
+    // std::cout << "Thread count is : " << thread_count << '\n';
 
     int *a = random_array(value_count);
     int *b = random_array(value_count);
@@ -134,11 +134,10 @@ int main(int argc, char *argv[]) {
 
     TimePoint end_time = steady_clock::now();
 
-    TimeSpan  span     = duration_cast<TimeSpan>(end_time - start_time);
+    TimeSpan span = duration_cast<TimeSpan>(end_time - start_time);
 
-    std::cout << "Execution time is : " << span.count() << '\n';
+    // std::cout << "Execution time is : " << span.count() << '\n';
+    std::cout << span.count();
 
     return 0;
 }
-
-

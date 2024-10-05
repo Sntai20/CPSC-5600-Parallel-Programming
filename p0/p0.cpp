@@ -95,8 +95,7 @@ int main(int argc, char *argv[]) {
 
     TimePoint end_time = steady_clock::now();
 
-    TimeSpan span = duration_cast<TimeSpan>
-    (end_time-start_time);
+    TimeSpan span = duration_cast<TimeSpan>(end_time - start_time);
 
     std::cout << span.count();
     return 0;
