@@ -25,3 +25,10 @@ Example of collecting data using the example program from the p1 project:
 make -C p1
 python AutomateDataCollection.py p1 example
 ```
+
+Example of collecting data without sampling the data, using the example program from the p1 project:
+
+```python
+make -C p1
+python AutomateDataCollection.py p1 example --nosample
+```
