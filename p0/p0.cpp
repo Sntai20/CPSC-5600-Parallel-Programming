@@ -77,12 +77,13 @@ int main(int argc, char *argv[]) {
     omp_set_num_threads(thread_count);
     // std::cout << "Value count is  : " << val_count << '\n';
     // std::cout << "Thread count is : " << thread_count << '\n';
-
-    TimePoint start_time = steady_clock::now();
     
     int *a = random_array(val_count);
     int *b = random_array(val_count);
     int *c = random_array(val_count);
+
+    // To avoid hiding the real runtime, start the timer after allocating memory for the arrays.
+    TimePoint start_time = steady_clock::now();
     
     // Refactor this loop  so that it performs its primary loop (with C[i] = A[i] * B[i] + C[i]) using multiple threads.
     // The number of threads should be set to the value of the second command-line argument.
