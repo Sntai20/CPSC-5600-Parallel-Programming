@@ -2,6 +2,8 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include <vector>
+#include <mutex>
 
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
@@ -57,6 +59,18 @@ int *random_array(size_t count) {
     return result;
 }
 
+// Calculates the partial sum of a segment of the array and updates
+// the global sum using a mutex to ensure thread safety.
+void partial_sum(int* data, size_t start, size_t end, int& sum, std::mutex& mtx) {
+    int local_sum = 0;
+    for (size_t i = start; i < end; ++i) {
+        local_sum += data[i];
+        data[i] = local_sum;
+    }
+    std::lock_guard<std::mutex> lock(mtx);
+    sum += local_sum;
+}
+
 // This is the function you need to parallelize
 // Whatever thread logic you use should be in this function, not in
 // main. I'll be running this function myself with different thread_count
@@ -73,16 +87,54 @@ void prefix_sum(int *data, size_t size, size_t thread_count) {
 
     The refactor should not change the signature of prefix_sum.
     */
+
+    // Ensures that the thread count is at least 1.
+    if (thread_count == 0) {
+        thread_count = 1;
+    }
+
+    // Initializes the threads, partial sums, and mutex.
+    std::vector<std::thread> threads;
+    std::vector<int> partial_sums(thread_count, 0);
+    std::mutex mtx;
+
+    // Calculates the chunk size and remainder.
+    size_t chunk_size = size / thread_count;
+    size_t remainder = size % thread_count;
+    
+    // Creates the threads and assigns them their respective segments of the array.
+    size_t start = 0;
+    for (size_t i = 0; i < thread_count; ++i) {
+        // Calculates the end index of the segment.
+        size_t end = start + chunk_size + (i < remainder ? 1 : 0);
+        
+        // Creates the thread and assigns it the segment.
+        threads.emplace_back(partial_sum, data, start, end, std::ref(partial_sums[i]), std::ref(mtx));
+        
+        // Updates the start index.
+        start = end;
+    }
+
+    // Join each of the threads to make sure all work has completed.
+    for (size_t i = 0; i < threads.size(); ++i) {
+        threads[i].join();
+    }
+
+    // Calculates the total sum and updates the array.
     int sum = 0;
-    for (size_t i = 0; i < size; i++) {
-        sum += data[i];
-        data[i] = sum;
+    for (size_t i = 0; i < thread_count; ++i) {
+        // Calculates the total sum.
+        sum += partial_sums[i];
+        size_t start = i * chunk_size + std::min(i, remainder);
+        size_t end = (i + 1) * chunk_size + std::min(i + 1, remainder);
+        for (size_t j = start; j < end; ++j) {
+            data[j] += sum - partial_sums[i];
+        }
     }
 }
 
-// desc: Calculates the prefix sum of an array of random
-//       integers
-//  pre: Command-line arguments should consiste of exactly
+// desc: Calculates the prefix sum of an array of random integers
+// pre: Command-line arguments should consiste of exactly
 //       two arguments, both positive integers
 // post: In description
 int main(int argc, char *argv[]) {
@@ -90,8 +142,8 @@ int main(int argc, char *argv[]) {
     int value_count, thread_count;
     get_args(argc, argv, value_count, thread_count);
 
-    std::cout << "Value count is  : " << value_count << '\n';
-    std::cout << "Thread count is : " << thread_count << '\n';
+    // std::cout << "Value count is  : " << value_count << '\n';
+    // std::cout << "Thread count is : " << thread_count << '\n';
 
     int *data = random_array(value_count);
     
