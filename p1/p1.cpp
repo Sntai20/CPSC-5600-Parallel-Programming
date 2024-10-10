@@ -87,7 +87,22 @@ int main(int argc, char *argv[]) {
     TimePoint start_time = steady_clock::now();
 
     prefix_sum(data, value_count, thread_count);
-    // parallel_multiply_add(a,b,c,value_count,thread_count);
+    
+    /*
+    void prefix_sum(int *data, size_t size, size_t thread_count)
+
+    This function performs a prefix sum over the array pointed by data, which has size elements. 
+    As it is given to you, this function is single threaded and does nothing with the thread_count parameter.
+    Your job now is to refactor p1.cpp so that its prefix_sum function performs its work using a number
+    of threads matching its thread_count parameter.
+
+    This refactor should use the C++ <thread> API for the added threading logic. Additionally, the
+    parallel/concurrent logic you add in your refactor should be in prefix_sum or its subroutines, not
+    in main. You may feel free to modify main for other purposes, such as gathering timing data.
+
+    prefix_sum will be ran separately to check for correctness/performance, so your refactor should not
+    change the signature of prefix_sum.
+    */
 
     TimePoint end_time = steady_clock::now();
 
