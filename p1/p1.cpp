@@ -1,5 +1,14 @@
 #include <cstdio>
 #include <iostream>
+#include <thread>
+#include <chrono>
+
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+using std::chrono::steady_clock;
+using std::this_thread::sleep_for;
+using TimePoint = std::chrono::steady_clock::time_point;
+using TimeSpan = std::chrono::duration<double>;
 
 std::string const USAGE = "Program requires exactly two arguments, both positive integers.\n";
 
