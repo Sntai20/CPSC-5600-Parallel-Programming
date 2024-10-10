@@ -74,8 +74,18 @@ int main(int argc, char *argv[]) {
     std::cout << "Thread count is : " << thread_count << '\n';
 
     int *data = random_array(value_count);
+    
+    TimePoint start_time = steady_clock::now();
 
     prefix_sum(data, value_count, thread_count);
+    // parallel_multiply_add(a,b,c,value_count,thread_count);
+
+    TimePoint end_time = steady_clock::now();
+
+    TimeSpan span = duration_cast<TimeSpan>(end_time - start_time);
+
+    // std::cout << "Execution time is : " << span.count() << '\n';
+    std::cout << span.count();
 
     return 0;
 }
