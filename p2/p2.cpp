@@ -97,8 +97,7 @@ Grid parallel_simulate(Input const &input, unsigned int display, size_t thread_c
     Refactor parallel_simulate so that:
     simulation is performed across thread_count threads
     one additional thread is tasked with performing display calls. (If display is zero, you may choose to not spawn a dedicated printing thread).
-    the work of the simulation threads and the printing thread must 
-    be synchronized in order to guarantee correct output; for this
+    the work of the simulation threads and the printing thread must be synchronized in order to guarantee correct output; for this
     project, synchronization must be implemented through barriers.
     This refactor should use the C++ <thread> API for the added threading logic and the C++ <barrier> API for synchronization.
     Additionally, the parallel/concurrent logic you add in your refactor should be in simulate or its subroutines, not in main.
@@ -117,8 +116,7 @@ Grid parallel_simulate(Input const &input, unsigned int display, size_t thread_c
         Grid &prev_state = ((t%2)==0) ? a : b;
         Grid &next_state = ((t%2)==0) ? b : a;
 
-        // If display is enabled, simulation should be shown before every
-        // time step
+        // If display is enabled, simulation should be shown before every time step.
         if ( (display > 0 ) && ((t%display)==0) ) {
             prev_state.display();
         }
