@@ -11,7 +11,12 @@
 #include "input.h"
 #include "input_set.h"
 
-
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+using std::chrono::steady_clock;
+using std::this_thread::sleep_for;
+using TimePoint = std::chrono::steady_clock::time_point;
+using TimeSpan = std::chrono::duration<double>;
 
 void update_energy_at(
     Grid &prev_state,
@@ -54,14 +59,23 @@ int main(int argc, char *argv[]) {
 
     Input & input = *(example_inputs[selection]);
 
-
     std::cout << "Running serial simulation." << std::endl;
+    TimePoint start_time_serial_simulate = steady_clock::now();
     Grid serial_result   = serial_simulate(input,input.get_duration()/64);
+    TimePoint end_time_serial_simulate = steady_clock::now();
+    TimeSpan span_serial_simulate = duration_cast<TimeSpan>(end_time_serial_simulate - start_time_serial_simulate);
+
     std::cout << "Running parallel simulation." << std::endl;
+    TimePoint start_time_parallel_simulate = steady_clock::now();
     Grid parallel_result = parallel_simulate(input,input.get_duration()/64,2);
+    TimePoint end_time_parallel_simulate = steady_clock::now();
+    TimeSpan span_parallel_simulate = duration_cast<TimeSpan>(end_time_parallel_simulate - start_time_parallel_simulate);
+
     std::cout << "Comparing grids." << std::endl;
     compare_grids(serial_result,parallel_result);
 
+    std::cout << "Serial Execution time is : " << span_serial_simulate.count() << '\n';
+    std::cout << "Parallel Execution time is : " << span_parallel_simulate.count() << '\n';
     return 0;
 }
 
@@ -79,6 +93,17 @@ int main(int argc, char *argv[]) {
 //  - The output of `parallel_simulate` should match the output of `serial_simulate`.
 Grid parallel_simulate(Input const &input, unsigned int display, size_t thread_count)
 {
+    /*
+    Refactor parallel_simulate so that:
+    simulation is performed across thread_count threads
+    one additional thread is tasked with performing display calls. (If display is zero, you may choose to not spawn a dedicated printing thread).
+    the work of the simulation threads and the printing thread must 
+    be synchronized in order to guarantee correct output; for this
+    project, synchronization must be implemented through barriers.
+    This refactor should use the C++ <thread> API for the added threading logic and the C++ <barrier> API for synchronization.
+    Additionally, the parallel/concurrent logic you add in your refactor should be in simulate or its subroutines, not in main.
+    You may feel free to modify main for other purposes, such as gathering timing data.
+    */
     size_t width    = input.get_width();
     size_t height   = input.get_height();
     size_t duration = input.get_duration();
