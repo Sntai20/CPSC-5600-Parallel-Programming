@@ -6,6 +6,9 @@
 #include <barrier>
 #include <thread>
 
+#include <thread>
+#include <vector>
+#include <barrier>
 
 #include "grid.h"
 #include "input.h"
@@ -79,6 +82,37 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
+// Simulate the heat transfer for a range of rows.
+void simulate(size_t start, size_t end, size_t width, size_t duration, Grid &a, Grid &b, Input const &input, std::barrier<> &sync_point)
+{
+    for (size_t t = 0; t < duration; ++t) {
+        Grid &prev_state = ((t % 2) == 0) ? a : b;
+        Grid &next_state = ((t % 2) == 0) ? b : a;
+
+        for (size_t y = start; y < end; ++y) {
+            for (size_t x = 0; x < width; ++x) {
+                next_state.at(x, y) = 0;
+                update_energy_at(prev_state, next_state, input, x, y, t);
+            }
+        }
+
+        sync_point.arrive_and_wait();
+    }
+}
+
+// Display the simulation state at regular intervals.
+void display_simulation(size_t duration, unsigned int display, Grid &a, Grid &b, std::barrier<> &sync_point)
+{
+    for (size_t t = 0; t < duration; ++t) {
+        if ((t % display) == 0) {
+            Grid &prev_state = ((t % 2) == 0) ? a : b;
+            prev_state.display();
+        }
+        sync_point.arrive_and_wait();
+    }
+    Grid &last_state = ((duration % 2) == 0) ? a : b;
+    last_state.display();
+}
 
 // This is the function that you need to refactor for parallelism!
 //
@@ -112,30 +146,33 @@ Grid parallel_simulate(Input const &input, unsigned int display, size_t thread_c
 
     a.clear();
 
-    for (size_t t=0; t<duration; t++) {
-        Grid &prev_state = ((t%2)==0) ? a : b;
-        Grid &next_state = ((t%2)==0) ? b : a;
+    // A barrier to synchronize threads at the end of each time step.
+    std::barrier sync_point(thread_count + (display > 0 ? 1 : 0));
 
-        // If display is enabled, simulation should be shown before every time step.
-        if ( (display > 0 ) && ((t%display)==0) ) {
-            prev_state.display();
-        }
+    // Create threads to simulate the heat transfer for different ranges of rows.
+    std::vector<std::thread> threads;
+    size_t rows_per_thread = height / thread_count;
+    
+    for (size_t i = 0; i < thread_count; ++i) {
 
-        for (size_t y=0; y<height; y++) {
-            for (size_t x=0; x<width; x++) {
-                next_state.at(x,y) = 0;
-                update_energy_at(prev_state,next_state,input,x,y,t);
-            }
-        }
+        // Calculate the range of rows to simulate for this thread.
+        size_t start = i * rows_per_thread;
+        size_t end = (i == thread_count - 1) ? height : start + rows_per_thread;
+        threads.emplace_back(simulate, start, end, width, duration, std::ref(a), std::ref(b), std::cref(input), std::ref(sync_point));
     }
 
-    Grid &last_state = ((duration%2)==0) ? a : b;
-
-    // Display the final state of the simulation if display is enabled.
+    // Create a thread to display the simulation state at regular intervals.
     if (display > 0) {
-        last_state.display();
+        threads.emplace_back(display_simulation, duration, display, std::ref(a), std::ref(b), std::ref(sync_point));
     }
 
+    // Wait for all threads to finish.
+    for (auto &thread : threads) {
+        thread.join();
+    }
+
+    // Return the final state of the simulation.
+    Grid &last_state = ((duration % 2) == 0) ? a : b;
     return last_state;
 }
 
