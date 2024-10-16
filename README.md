@@ -32,3 +32,12 @@ Example of collecting data without sampling the data, using the example program 
 make -C p1
 python AutomateDataCollection.py p1 example --nosample
 ```
+
+## P2: Parallel Simulation
+
+The followling is an example of running the p2 program in the p2 folder:
+
+```bash
+make -C p2
+p2/out/p2 1
+```
