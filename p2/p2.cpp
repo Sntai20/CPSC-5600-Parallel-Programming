@@ -53,19 +53,11 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    // Run the simulation with a variety of durations and thread counts.
     std::vector<size_t> durations = {64, 128, 256, 512, 1024, 2048, 4096};
     std::vector<size_t> thread_counts = {1, 2, 3, 4, 5, 6, 7, 8};
 
     std::cout << "Duration, Thread Count, Runtime (ms)" << std::endl;
-
-    Input *example_inputs[] = {
-        new TopLeft(16,16,64),
-        new Orbit(64,4096),
-        new Wall(32,8192),
-        // new OrbitWall(128,4096)
-        // new OrbitWall(128,64)
-        new OrbitWall(128,64)
-    };
 
     for (size_t duration : durations) {
         for (size_t thread_count : thread_counts) {
@@ -73,41 +65,28 @@ int main(int argc, char *argv[]) {
                 new TopLeft(16,16,64),
                 new Orbit(64,4096),
                 new Wall(32,8192),
-                // new OrbitWall(128,4096)
                 new OrbitWall(128,duration)
             };
-            // WallOrbit input(128, duration);
             Input & input = *(example_inputs[selection]);
 
+            // std::cout << "Running serial simulation." << std::endl;
+            // TimePoint start_time_serial_simulate = steady_clock::now();
+            // Grid serial_result = serial_simulate(input,thread_count);
+            // TimePoint end_time_serial_simulate = steady_clock::now();
+            // TimeSpan span_serial_simulate = duration_cast<TimeSpan>(end_time_serial_simulate - start_time_serial_simulate);
+
+            // std::cout << "Running parallel simulation." << std::endl;
             TimePoint start_time_parallel_simulate = steady_clock::now();
-            Grid result = parallel_simulate(input, 0, thread_count);
+            Grid parallel_result = parallel_simulate(input, 0, thread_count);
             TimePoint end_time_parallel_simulate = steady_clock::now();
             TimeSpan runtime = duration_cast<TimeSpan>(end_time_parallel_simulate - start_time_parallel_simulate);
 
             std::cout << duration << ", " << thread_count << ", " << runtime.count() << std::endl;
+            // std::cout << "Comparing grids." << std::endl;
+            // compare_grids(serial_result,parallel_result);
         }
-    }
+    } 
 
-    // Input & input = *(example_inputs[selection]);
-
-    // std::cout << "Running serial simulation." << std::endl;
-    // TimePoint start_time_serial_simulate = steady_clock::now();
-    // Grid serial_result   = serial_simulate(input,input.get_duration()/64);
-    // TimePoint end_time_serial_simulate = steady_clock::now();
-    // TimeSpan span_serial_simulate = duration_cast<TimeSpan>(end_time_serial_simulate - start_time_serial_simulate);
-
-    // std::cout << "Running parallel simulation." << std::endl;
-    // TimePoint start_time_parallel_simulate = steady_clock::now();
-    // // Grid parallel_result = parallel_simulate(input,input.get_duration()/64,2);
-    // Grid parallel_result = parallel_simulate(input,0,2);
-    // TimePoint end_time_parallel_simulate = steady_clock::now();
-    // TimeSpan span_parallel_simulate = duration_cast<TimeSpan>(end_time_parallel_simulate - start_time_parallel_simulate);
-
-    // std::cout << "Comparing grids." << std::endl;
-    // compare_grids(serial_result,parallel_result);
-
-    // std::cout << "Serial Execution time is : " << span_serial_simulate.count() << '\n';
-    // std::cout << "Parallel Execution time is : " << span_parallel_simulate.count() << '\n';
     return 0;
 }
 
