@@ -85,17 +85,26 @@ int main(int argc, char *argv[]) {
 // Simulate the heat transfer for a range of rows.
 void simulate(size_t start, size_t end, size_t width, size_t duration, Grid &a, Grid &b, Input const &input, std::barrier<> &sync_point)
 {
+    // Simulate the heat transfer for the specified range of rows.
     for (size_t t = 0; t < duration; ++t) {
+
+        // Determine which state is the current state and which is the next state.
         Grid &prev_state = ((t % 2) == 0) ? a : b;
         Grid &next_state = ((t % 2) == 0) ? b : a;
 
+        // Simulate the heat transfer for the specified range of rows.
         for (size_t y = start; y < end; ++y) {
+
+            // Simulate the heat transfer for each cell in the row.
             for (size_t x = 0; x < width; ++x) {
+
+                // Update the energy at the current cell.
                 next_state.at(x, y) = 0;
                 update_energy_at(prev_state, next_state, input, x, y, t);
             }
         }
 
+        // Wait for all threads to finish before moving to the next time step.
         sync_point.arrive_and_wait();
     }
 }
@@ -105,18 +114,24 @@ void display_simulation(size_t duration, unsigned int display, Grid &a, Grid &b,
 {
     for (size_t t = 0; t < duration; ++t) {
         if ((t % display) == 0) {
+
+            // Display the current state of the simulation.
             Grid &prev_state = ((t % 2) == 0) ? a : b;
             prev_state.display();
         }
+
+        // Wait for all threads to finish before moving to the next time step.
         sync_point.arrive_and_wait();
     }
+
+    // Display the final state of the simulation.
     Grid &last_state = ((duration % 2) == 0) ? a : b;
     last_state.display();
 }
 
 // This is the function that you need to refactor for parallelism!
 //
-// Currenty, its definition matches the `serial_simulate` function.
+// Currently, its definition matches the `serial_simulate` function.
 // You may create additional functions for this function to call into, and
 // you may feel free to modify the content of this function.
 //
@@ -133,9 +148,6 @@ Grid parallel_simulate(Input const &input, unsigned int display, size_t thread_c
     one additional thread is tasked with performing display calls. (If display is zero, you may choose to not spawn a dedicated printing thread).
     the work of the simulation threads and the printing thread must be synchronized in order to guarantee correct output; for this
     project, synchronization must be implemented through barriers.
-    This refactor should use the C++ <thread> API for the added threading logic and the C++ <barrier> API for synchronization.
-    Additionally, the parallel/concurrent logic you add in your refactor should be in simulate or its subroutines, not in main.
-    You may feel free to modify main for other purposes, such as gathering timing data.
     */
     size_t width    = input.get_width();
     size_t height   = input.get_height();
@@ -182,7 +194,7 @@ Grid parallel_simulate(Input const &input, unsigned int display, size_t thread_c
 // desc: Set the element at (x,y) in `next_state` to match the state
 //       that should follow for element (x,y) in `prev_state`.
 // pre : `prev_state` and `next_state` must have the same dimensions,
-//       and (x,y) must be valid coodinates within both. Also, the
+//       and (x,y) must be valid coordinates within both. Also, the
 //       (x,y,t) coordinates provided must be valid in `input`.
 // post: none, aside from description
 void update_energy_at(
@@ -202,7 +214,7 @@ void update_energy_at(
     // Iterate across the (3x3) cell neighborhood around (x,y)
     for (int i=-1; i<=1; i++) {
         for (int j=-1; j<=1; j++) {
-            // Determine weight for energy tranfer between
+            // Determine weight for energy transfer between
             // the current pair of cells
             size_t weight_index = abs(i) + abs(j);
             double w = weights[weight_index];
