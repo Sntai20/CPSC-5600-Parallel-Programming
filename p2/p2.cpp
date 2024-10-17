@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
     std::vector<size_t> durations = {64, 128, 256, 512, 1024, 2048, 4096};
     std::vector<size_t> thread_counts = {1, 2, 3, 4, 5, 6, 7, 8};
 
-    std::cout << "Duration, Thread Count, Runtime (ms)" << std::endl;
+    std::cout << "Thread Count, Duration, Runtime (ms)" << std::endl;
 
     for (size_t duration : durations) {
         for (size_t thread_count : thread_counts) {
@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
             TimePoint end_time_parallel_simulate = steady_clock::now();
             TimeSpan runtime = duration_cast<TimeSpan>(end_time_parallel_simulate - start_time_parallel_simulate);
 
-            std::cout << duration << ", " << thread_count << ", " << runtime.count() << std::endl;
+            std::cout << thread_count << ", " << duration << ", " << runtime.count() << std::endl;
             // std::cout << "Comparing grids." << std::endl;
             // compare_grids(serial_result,parallel_result);
         }
