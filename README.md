@@ -39,7 +39,7 @@ The following is an example of running the p2 program in the p2 folder:
 
 ```bash
 make -C p2
-p2/out/p2 1
+p2/out/p2 3
 ```
 
 ### Gathering Data
@@ -48,3 +48,14 @@ To collect performance measurements gather the runtime of parallel_simulate meth
 
 - Durations: [ 64, 128, 256, 512, 1024, 2048, 4096 ]
 - Thread Counts: [ 1 2 3 4 5 6 7 8 ]
+
+## Import CSV files into Excel (for Macs)
+
+1. Save the output into output.csv.
+1. Open Excel: Open a new or existing workbook.
+1. Go to the Data Tab: Click on the Data tab on the Ribbon.
+1. Get Data: Click on the Get Data (Power Query).
+1. Select Text/CSV: Import data from a text or CSV file.
+1. Select the CSV file to import: Click browse, select output.csv, Click Get Data, then Next.
+1. Preview file data: Excel will show a preview of the data. You can adjust settings like delimiter (comma, semicolon, etc.) if needed. Once everything looks good, click Load.
+1. Data Loaded: The CSV data will be imported into your Excel worksheet.
