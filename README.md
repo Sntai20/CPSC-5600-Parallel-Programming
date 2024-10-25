@@ -59,3 +59,12 @@ To collect performance measurements gather the runtime of parallel_simulate meth
 1. Select the CSV file to import: Click browse, select output.csv, Click Get Data, then Next.
 1. Preview file data: Excel will show a preview of the data. You can adjust settings like delimiter (comma, semicolon, etc.) if needed. Once everything looks good, click Load.
 1. Data Loaded: The CSV data will be imported into your Excel worksheet.
+
+## P3: Implementing Barriers and Bitonic Sort
+
+The program requires exactly two arguments, both positive integers. The following is an example of running the p3 program in the p3 folder:
+
+```bash
+make -C p3
+p3/out/p3 3 3
+```
