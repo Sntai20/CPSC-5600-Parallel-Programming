@@ -68,3 +68,15 @@ The program requires exactly two arguments, both positive integers. The followin
 make -C p3
 p3/out/p3 3 3
 ```
+
+### Compile the program with the custom class enabled
+
+To compile the program with the custom class enabled, comment out line 7 and 8, then uncomment lines 10 and 11 in the MakeFile. An example is provided below.
+
+```text
+# p3: p3.cpp Makefile
+# 	g++ p3.cpp -o out/p3 -lpthread -Wall -Werror --std=c++20
+
+p3: p3.cpp Makefile
+	g++ p3.cpp -o out/p3 -lpthread -Wall -Werror --std=c++20 -DCUSTOM_BARRIER
+```
