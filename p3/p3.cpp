@@ -6,6 +6,13 @@
 #include <barrier>
 #include <condition_variable>
 
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+using std::chrono::steady_clock;
+using std::this_thread::sleep_for;
+using TimePoint = std::chrono::steady_clock::time_point;
+using TimeSpan = std::chrono::duration<double>;
+
 #ifdef CUSTOM_BARRIER
 // Implementation cannot use any synchronization primitives
 // aside from mutexes.
@@ -100,7 +107,12 @@ int main() {
 
     barrier_test();
 
+    TimePoint start_time = steady_clock::now();
     bitonic_test();
+    TimePoint end_time = steady_clock::now();
+    
+    TimeSpan runtime = duration_cast<TimeSpan>(end_time - start_time);
+    std::cout << "Bitonic test runtime: " << runtime.count() << " seconds.\n";   
 
     return 0;
 }
@@ -156,7 +168,7 @@ void get_args(int argc, char *argv[], int &val_count, int &thread_count) {
 }
 
 
-// desc: A simple test function for the parallel bitonic soring function.
+// desc: A simple test function for the parallel bitonic sorting function.
 //       You will likely need to implement more fine-grained testing if you want to
 //       debug your code effectively.
 //  pre: None
