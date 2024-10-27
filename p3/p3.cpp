@@ -4,22 +4,42 @@
 #include <vector>
 #include <mutex>
 #include <barrier>
+#include <condition_variable>
 
 #ifdef CUSTOM_BARRIER
 // Implementation cannot use any synchronization primitives
 // aside from mutexes.
 class Barrier {
     private:
+    std::mutex mutex;
+    std::condition_variable conditionalVariable;
+    ptrdiff_t count;
+    ptrdiff_t expected;
 
     public:
     // Do not change the signature of this method
     Barrier(ptrdiff_t expected){
-        // ???
+        // Initialize both the initial expected count for each phase and
+        // the current expected count for the first phase to expected.
+        this->count = 0;
+        this->expected = expected;
     }
 
     // Do not change the signature of this method
     void arrive_and_wait() {
-        // ???
+        // Atomically increment the expected count by 1, then blocks at the
+        // synchronization point for the current phase until the phase
+        // completion step of the current phase is run.
+        std::unique_lock<std::mutex> lock(mutex);
+        count++;
+        // If count is equal to expected, notify all threads and reset count to 0.
+        if(count == expected){
+            count = 0;
+            conditionalVariable.notify_all();
+        } else {
+            // Otherwise, wait until count is equal to expected.
+            conditionalVariable.wait(lock, [this](){return count == expected;});
+        }
     }
 };
 
