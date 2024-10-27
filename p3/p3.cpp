@@ -39,6 +39,8 @@ class Barrier {
         // completion step of the current phase is run.
         std::unique_lock<std::mutex> lock(mutex);
         count++;
+        // Unlock the mutex and notify all threads if count is equal to expected.
+        mutex.unlock();
         // If count is equal to expected, notify all threads and reset count to 0.
         if(count == expected){
             count = 0;
@@ -76,6 +78,24 @@ void bitonic_sort(int64_t *data, size_t size) {
 }
 
 
+// Helper function for parallel bitonic sort
+void parallel_bitonic_sort_helper(int64_t *data, size_t size, size_t start, size_t end, Barrier& barrier) {
+    for (size_t i = 1; i < size; i <<= 1) {
+        for (size_t j = i; j > 0; j >>= 1) {
+            for (size_t k = start; k < end; k++) {
+                if (k & j) {
+                    k += j - 1;
+                    continue;
+                }
+                size_t mask = i << 1;
+                if (((k & mask) == 0) == (data[k] > data[k + j])) {
+                    std::swap(data[k], data[k + j]);
+                }
+            }
+            barrier.arrive_and_wait();
+        }
+    }
+}
 
 // Do not change the signature of this function
 void parallel_bitonic_sort(int64_t *data, size_t size, size_t thread_count) {
@@ -92,6 +112,21 @@ void parallel_bitonic_sort(int64_t *data, size_t size, size_t thread_count) {
 
     bitonic_sort(data,size);
 
+    // Barrier barrier(thread_count);
+    // std::vector<std::thread> threads;
+    // size_t chunk_size = size / thread_count;
+
+    // // Create threads to perform the parallel bitonic sort
+    // for (size_t i = 0; i < thread_count; i++) {
+    //     size_t start = i * chunk_size;
+    //     size_t end = (i == thread_count - 1) ? size : (i + 1) * chunk_size; // Handle the last chunk
+    //     threads.emplace_back(parallel_bitonic_sort_helper, data, size, start, end, std::ref(barrier));
+    // }
+
+    // // Join threads
+    // for (auto& t : threads) {
+    //     t.join();
+    // }
 }
 
 
