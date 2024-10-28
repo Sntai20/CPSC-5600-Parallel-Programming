@@ -22,6 +22,7 @@ class Barrier {
     std::condition_variable conditionalVariable;
     ptrdiff_t count;
     ptrdiff_t expected;
+    const int busy_wait_duration = 10; // Busy wait duration in milliseconds
 
     public:
     // Do not change the signature of this method
@@ -33,21 +34,72 @@ class Barrier {
     }
 
     // Do not change the signature of this method
+    // void arrive_and_wait() {
+    //     // Increment the expected count by 1, then blocks at the
+    //     // synchronization point for the current phase until the phase
+    //     // completion step of the current phase is run.
+    //     std::unique_lock<std::mutex> lock(mutex);
+    //     count++;
+    //     // Unlock the mutex and notify all threads if count is equal to expected.
+    //     mutex.unlock();
+    //     // If count is equal to expected, notify all threads and reset count to 0.
+    //     if(count == expected){
+    //         count = 0;
+    //         conditionalVariable.notify_all();
+    //     } else {
+    //         // Otherwise, wait until count is equal to expected.
+    //         conditionalVariable.wait(lock, [this](){return count == expected;});
+    //     }
+    // }
+
+    // This is using a busy wait approach.
+    // void arrive_and_wait() {
+    //     std::unique_lock<std::mutex> lock(mutex);
+    //     ++count;
+    //     if (count < expected) {
+    //         while (count < expected) {
+    //             // Busy wait
+    //             lock.unlock();
+    //             std::this_thread::yield(); // Yield to other threads
+    //             lock.lock();
+    //         }
+    //     } else {
+    //         count = 0; // Reset for the next phase
+    //     }
+    // }
+
+    // This is using a condition variable approach.
+    // void arrive_and_wait() {
+    //     std::unique_lock<std::mutex> lock(mutex);
+    //     ++count;
+    //     if (count < expected) {
+    //         conditionalVariable.wait(lock, [this] { return count == 0; });
+    //     } else {
+    //         count = 0; // Reset for the next phase
+    //         conditionalVariable.notify_all(); // Notify all waiting threads
+    //     }
+    // }
+
     void arrive_and_wait() {
-        // Atomically increment the expected count by 1, then blocks at the
-        // synchronization point for the current phase until the phase
-        // completion step of the current phase is run.
         std::unique_lock<std::mutex> lock(mutex);
-        count++;
-        // Unlock the mutex and notify all threads if count is equal to expected.
-        mutex.unlock();
-        // If count is equal to expected, notify all threads and reset count to 0.
-        if(count == expected){
-            count = 0;
-            conditionalVariable.notify_all();
+        ++count;
+        if (count < expected) {
+            // Busy wait for a short duration.
+            auto start = std::chrono::steady_clock::now();
+            while (count < expected) {
+                auto now = std::chrono::steady_clock::now();
+                if (std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count() > busy_wait_duration) {
+                    // Switch to condition variable wait after busy wait duration.
+                    conditionalVariable.wait(lock, [this] { return count == 0; });
+                    break;
+                }
+
+                // Yield to other threads.
+                std::this_thread::yield();
+            }
         } else {
-            // Otherwise, wait until count is equal to expected.
-            conditionalVariable.wait(lock, [this](){return count == expected;});
+            count = 0; // Reset for the next phase
+            conditionalVariable.notify_all(); // Notify all waiting threads
         }
     }
 };
@@ -56,6 +108,26 @@ class Barrier {
 using Barrier = std::barrier<>;
 #endif
 
+// Simple function to test the barrier implementation.
+void task(Barrier& barrier) {
+    std::cout << "Task started\n";
+    barrier.arrive_and_wait();
+    std::cout << "Task completed\n";
+}
+
+void simple_barrier_test() {
+    const int num_threads = 3;
+    Barrier barrier(num_threads);
+    std::vector<std::thread> threads;
+    
+    for (int i = 0; i < num_threads; i++) {
+        threads.emplace_back(task, std::ref(barrier));
+    }
+
+    for (auto& t : threads) {
+        t.join();
+    }
+}
 
 // A serial implementation of bitonic sort, for reference. Feel free to
 // use it as a skeleton for your parallel implementation.
@@ -139,15 +211,16 @@ void get_args(int argc, char *argv[], int &val_count, int &thread_count);
 
 
 int main() {
+    simple_barrier_test();
 
     barrier_test();
 
-    TimePoint start_time = steady_clock::now();
-    bitonic_test();
-    TimePoint end_time = steady_clock::now();
+    // TimePoint start_time = steady_clock::now();
+    // bitonic_test();
+    // TimePoint end_time = steady_clock::now();
     
-    TimeSpan runtime = duration_cast<TimeSpan>(end_time - start_time);
-    std::cout << "Bitonic test runtime: " << runtime.count() << " seconds.\n";   
+    // TimeSpan runtime = duration_cast<TimeSpan>(end_time - start_time);
+    // std::cout << "Bitonic test runtime: " << runtime.count() << " seconds.\n";   
 
     return 0;
 }
