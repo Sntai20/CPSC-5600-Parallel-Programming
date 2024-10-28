@@ -22,7 +22,7 @@ class Barrier {
     std::condition_variable conditionalVariable;
     ptrdiff_t count;
     ptrdiff_t expected;
-    const int busy_wait_duration = 10; // Busy wait duration in milliseconds
+    // const int busy_wait_duration = 10; // Busy wait duration in milliseconds
 
     public:
     // Do not change the signature of this method
@@ -80,23 +80,34 @@ class Barrier {
     //     }
     // }
 
+    // void arrive_and_wait() {
+    //     std::unique_lock<std::mutex> lock(mutex);
+    //     ++count;
+    //     if (count < expected) {
+    //         // Busy wait for a short duration.
+    //         auto start = std::chrono::steady_clock::now();
+    //         while (count < expected) {
+    //             auto now = std::chrono::steady_clock::now();
+    //             if (std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count() > busy_wait_duration) {
+    //                 // Switch to condition variable wait after busy wait duration.
+    //                 conditionalVariable.wait(lock, [this] { return count == 0; });
+    //                 break;
+    //             }
+
+    //             // Yield to other threads.
+    //             std::this_thread::yield();
+    //         }
+    //     } else {
+    //         count = 0; // Reset for the next phase
+    //         conditionalVariable.notify_all(); // Notify all waiting threads
+    //     }
+    // }
+
     void arrive_and_wait() {
         std::unique_lock<std::mutex> lock(mutex);
         ++count;
         if (count < expected) {
-            // Busy wait for a short duration.
-            auto start = std::chrono::steady_clock::now();
-            while (count < expected) {
-                auto now = std::chrono::steady_clock::now();
-                if (std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count() > busy_wait_duration) {
-                    // Switch to condition variable wait after busy wait duration.
-                    conditionalVariable.wait(lock, [this] { return count == 0; });
-                    break;
-                }
-
-                // Yield to other threads.
-                std::this_thread::yield();
-            }
+            conditionalVariable.wait(lock, [this] { return count == 0; });
         } else {
             count = 0; // Reset for the next phase
             conditionalVariable.notify_all(); // Notify all waiting threads
