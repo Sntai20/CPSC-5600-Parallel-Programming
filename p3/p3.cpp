@@ -170,7 +170,7 @@ void parallel_bitonic_sort_helper(int64_t *data, size_t size, size_t start, size
 }
 
 // Do not change the signature of this function
-void parallel_bitonic_sort(int64_t *data, size_t size, size_t thread_count) {
+// void parallel_bitonic_sort(int64_t *data, size_t size, size_t thread_count) {
 
     // Parallel implementation goes here.
 
@@ -182,7 +182,7 @@ void parallel_bitonic_sort(int64_t *data, size_t size, size_t thread_count) {
     // subroutines. If a submission does use something like std::sort for this
     // logic, it would not get a good grade.
 
-    bitonic_sort(data,size);
+    // bitonic_sort(data,size);
 
     // Barrier barrier(thread_count);
     // std::vector<std::thread> threads;
@@ -199,9 +199,65 @@ void parallel_bitonic_sort(int64_t *data, size_t size, size_t thread_count) {
     // for (auto& t : threads) {
     //     t.join();
     // }
+// }
+
+void bitonic_merge(int64_t *data, size_t low, size_t cnt, bool dir) {
+    if (cnt > 1) {
+        size_t k = cnt / 2;
+        for (size_t i = low; i < low + k; ++i) {
+            if (dir == (data[i] > data[i + k])) {
+                std::swap(data[i], data[i + k]);
+            }
+        }
+        bitonic_merge(data, low, k, dir);
+        bitonic_merge(data, low + k, k, dir);
+    }
 }
 
+void bitonic_sort_recursive(int64_t *data, size_t low, size_t cnt, bool dir) {
+    if (cnt > 1) {
+        size_t k = cnt / 2;
+        bitonic_sort_recursive(data, low, k, true);
+        bitonic_sort_recursive(data, low + k, k, false);
+        bitonic_merge(data, low, cnt, dir);
+    }
+}
 
+void thread_func(int64_t *data, size_t size, size_t thread_count, size_t tid, Barrier &barrier) {
+    size_t chunk_size = size / thread_count;
+    size_t low = tid * chunk_size;
+    size_t high = (tid + 1) * chunk_size;
+
+    for (size_t step = 2; step <= size; step *= 2) {
+        for (size_t sub_step = step / 2; sub_step > 0; sub_step /= 2) {
+            for (size_t i = low; i < high; ++i) {
+                size_t ixj = i ^ sub_step;
+                if (ixj > i) {
+                    if ((i & step) == 0 && data[i] > data[ixj]) {
+                        std::swap(data[i], data[ixj]);
+                    }
+                    if ((i & step) != 0 && data[i] < data[ixj]) {
+                        std::swap(data[i], data[ixj]);
+                    }
+                }
+            }
+            barrier.arrive_and_wait();
+        }
+    }
+}
+
+void parallel_bitonic_sort(int64_t *data, size_t size, size_t thread_count) {
+    Barrier barrier(thread_count);
+    std::vector<std::thread> threads;
+
+    for (size_t i = 0; i < thread_count; ++i) {
+        threads.emplace_back(thread_func, data, size, thread_count, i, std::ref(barrier));
+    }
+
+    for (auto& t : threads) {
+        t.join();
+    }
+}
 
 // Helpful functions, defined below main
 int64_t *random_array(size_t count);
@@ -215,12 +271,12 @@ int main() {
 
     barrier_test();
 
-    // TimePoint start_time = steady_clock::now();
-    // bitonic_test();
-    // TimePoint end_time = steady_clock::now();
+    TimePoint start_time = steady_clock::now();
+    bitonic_test();
+    TimePoint end_time = steady_clock::now();
     
-    // TimeSpan runtime = duration_cast<TimeSpan>(end_time - start_time);
-    // std::cout << "Bitonic test runtime: " << runtime.count() << " seconds.\n";   
+    TimeSpan runtime = duration_cast<TimeSpan>(end_time - start_time);
+    std::cout << "Bitonic test runtime: " << runtime.count() << " seconds.\n";   
 
     return 0;
 }
