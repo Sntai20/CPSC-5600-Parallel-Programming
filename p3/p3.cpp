@@ -17,13 +17,13 @@ using TimeSpan = std::chrono::duration<double>;
 // Implementation cannot use any synchronization primitives
 // aside from mutexes.
 class Barrier {
-    private:
+private:
     std::mutex mutex;
     std::condition_variable conditionalVariable;
     ptrdiff_t count;
     ptrdiff_t expected;
 
-    public:
+public:
     // Do not change the signature of this method
     Barrier(ptrdiff_t expected) : count(0), expected(expected) {}
 
@@ -31,13 +31,14 @@ class Barrier {
     void arrive_and_wait() {
         std::unique_lock<std::mutex> lock(mutex);
         ++count;
-        if (count < expected) {
-            conditionalVariable.wait(lock, [this] { return count == 0; });
+
+        if (count == expected) {
+            // If the last thread has arrived, notify all waiting threads
+            count = 0; // Reset for the next phase
+            conditionalVariable.notify_all();
         } else {
-            // Reset for the next phase
-            count = 0;
-            // Otherwise, wait until count is equal to expected.
-            conditionalVariable.notify_all(); // Notify all waiting threads
+            // Otherwise, wait until notified
+            conditionalVariable.wait(lock, [this] { return count == 0; });
         }
     }
 };
@@ -93,9 +94,10 @@ void bitonic_sort(int64_t *data, size_t size) {
 // thread. It performs the bitonic sort in parallel, synchronizing the threads
 // at each step using the Barrier to ensure correct sorting.
 void thread_func(int64_t *data, size_t size, size_t thread_count, size_t tid, Barrier &barrier) {
-    size_t chunk_size = size / thread_count;
+    size_t chunk_size = (size + thread_count - 1) / thread_count;
     size_t low = tid * chunk_size;
-    size_t high = (tid + 1) * chunk_size;
+     // Ensure high does not exceed size
+    size_t high = std::min((tid + 1) * chunk_size, size);
 
     for (size_t step = 2; step <= size; step *= 2) {
         for (size_t sub_step = step / 2; sub_step > 0; sub_step /= 2) {
@@ -113,12 +115,16 @@ void thread_func(int64_t *data, size_t size, size_t thread_count, size_t tid, Ba
             barrier.arrive_and_wait();
         }
     }
+
     // Debugging: Print the sorted chunk for each thread
-    // std::cout << "Thread " << tid << " sorted chunk: ";
-    // for (size_t i = low; i < high; ++i) {
-    //     std::cout << data[i] << " ";
-    // }
-    // std::cout << std::endl;
+    /*
+    std::lock_guard<std::mutex> lock(cout_mutex);
+    std::cout << "Thread " << tid << " sorted chunk: ";
+    for (size_t i = low; i < high; ++i) {
+        std::cout << data[i] << " ";
+    }
+    std::cout << std::endl;
+    */
 }
 
 // Do not change the signature of this function
@@ -144,13 +150,6 @@ void barrier_test();
 void bitonic_test();
 void get_args(int argc, char *argv[], int &val_count, int &thread_count);
 
-// Function to initialize data with random values
-void initialize_data(int64_t *data, size_t size) {
-    for (size_t i = 0; i < size; ++i) {
-        data[i] = rand();
-    }
-}
-
 // Function to validate sorted data
 bool validate_sorted_data(int64_t *data, size_t size) {
     for (size_t i = 0; i < size - 1; ++i) {
@@ -166,13 +165,11 @@ int main(int argc, char *argv[]) {
 
     std::vector<size_t> element_counts = {8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576};
     std::vector<size_t> thread_counts = {1, 2, 3, 4, 5, 6, 7, 8};
-    // std::vector<size_t> element_counts = {1048576};
-    // std::vector<size_t> thread_counts = {1, 2, 3, 4, 5, 6, 7, 8};
 
     for (size_t size : element_counts) {
         for (size_t thread_count : thread_counts) {
-            int64_t *data = new int64_t[size];
-            initialize_data(data, size);
+            // Make a power-of-two sized array filled with random values
+            int64_t *data = random_array(size);
 
             TimePoint start_time = steady_clock::now();
             parallel_bitonic_sort(data, size, thread_count);
@@ -189,9 +186,9 @@ int main(int argc, char *argv[]) {
             delete[] data;
         }
     }
-    simple_barrier_test();
+    // simple_barrier_test();
 
-    // barrier_test();
+    barrier_test();
 
     bitonic_test();
 
