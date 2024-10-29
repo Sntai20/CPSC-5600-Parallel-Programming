@@ -22,23 +22,26 @@ private:
     std::condition_variable conditionalVariable;
     ptrdiff_t count;
     ptrdiff_t expected;
+    int phase;
 
 public:
     // Do not change the signature of this method
-    Barrier(ptrdiff_t expected) : count(0), expected(expected) {}
+    Barrier(ptrdiff_t expected) : count(0), expected(expected), phase(0) {}
 
     // Do not change the signature of this method
     void arrive_and_wait() {
         std::unique_lock<std::mutex> lock(mutex);
+        int current_phase = phase;
         ++count;
 
         if (count == expected) {
             // If the last thread has arrived, notify all waiting threads
             count = 0; // Reset for the next phase
+            ++phase;
             conditionalVariable.notify_all();
         } else {
             // Otherwise, wait until notified
-            conditionalVariable.wait(lock, [this] { return count == 0; });
+            conditionalVariable.wait(lock, [this, current_phase] { return phase != current_phase; });
         }
     }
 };
@@ -176,15 +179,18 @@ int main(int argc, char *argv[]) {
             TimePoint end_time = steady_clock::now();
 
             if (validate_sorted_data(data, size)) {
-                std::cout << "Data is sorted for size " << size << " with " << thread_count << " threads using custom Barrier." << std::endl;
+                // std::cout << "Data is sorted for size " << size << " with " << thread_count << " threads using custom Barrier." << std::endl;
                 TimeSpan runtime = duration_cast<TimeSpan>(end_time - start_time);
-                std::cout << "Bitonic test runtime: " << runtime.count() << " seconds.\n"; 
+                // std::cout << "Bitonic test runtime: " << runtime.count() << " seconds.\n";
+                std::cout << runtime.count() << ",";
             } else {
                 std::cout << "Data is NOT sorted for size " << size << " with " << thread_count << " threads using custom Barrier." << std::endl;
             }
 
             delete[] data;
         }
+
+        std::cout << std::endl;
     }
     // simple_barrier_test();
 
