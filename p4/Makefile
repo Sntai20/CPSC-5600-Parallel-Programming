@@ -1,2 +1,7 @@
+all: out p4
+
+out:
+	mkdir out
+
 p4: p4.cpp Makefile
-	g++ p4.cpp -o p4 -lpthread -Wall -Werror --std=c++20
+	g++ p4.cpp -o out/p4 -lpthread -Wall -Werror --std=c++20

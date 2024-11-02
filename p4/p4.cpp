@@ -4,75 +4,75 @@
 #include <random>
 #include <chrono>
 
-template<typename T>
-class SharedPointer {
+// template<typename T>
+// class SharedPointer {
 
-    public:
+//     public:
 
-    SharedPointer() {
-        // ???
-    }
+//     SharedPointer() {
+//         // ???
+//     }
 
-    SharedPointer(T* raw_pointer) {
-        // ???
-    }
+//     SharedPointer(T* raw_pointer) {
+//         // ???
+//     }
 
-    SharedPointer(SharedPointer& other) {
-        // ???
-    }
+//     SharedPointer(SharedPointer& other) {
+//         // ???
+//     }
 
-    ~SharedPointer() {
-        // ???
-    }
+//     ~SharedPointer() {
+//         // ???
+//     }
 
-    SharedPointer& operator=(SharedPointer& other) {
-        // ???
-    }
+//     SharedPointer& operator=(SharedPointer& other) {
+//         // ???
+//     }
 
-    T& operator*() {
-        // ???
-    }
+//     T& operator*() {
+//         // ???
+//     }
 
-    T* operator->() {
-        // ???
-    }
+//     T* operator->() {
+//         // ???
+//     }
 
-    operator bool() {
-        // ???
-    }
+//     operator bool() {
+//         // ???
+//     }
 
-};
+// };
 
 
 
-template<typename T>
-class AtomicIterator {
+// template<typename T>
+// class AtomicIterator {
 
-    public:
+//     public:
 
-    AtomicIterator(T* buffer, size_t size){
-        // ???
-    }
+//     AtomicIterator(T* buffer, size_t size){
+//         // ???
+//     }
 
-    AtomicIterator(AtomicIterator& other) {
-        // ???
-    }
+//     AtomicIterator(AtomicIterator& other) {
+//         // ???
+//     }
 
-    AtomicIterator& operator=(AtomicIterator& other) {
-        // ???
-    }
+//     AtomicIterator& operator=(AtomicIterator& other) {
+//         // ???
+//     }
 
-    T* next() {
-        // ???
-    }
+//     T* next() {
+//         // ???
+//     }
 
-};
+// };
 
 
 
 int main() {
 
     // You may call the test drivers for your implementations here
-
+    std::cout << "Hello, World!" << std::endl;
     return 0;
 }
