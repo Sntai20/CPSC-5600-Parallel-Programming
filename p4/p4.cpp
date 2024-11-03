@@ -9,41 +9,61 @@
 template<typename T>
 class SharedPointer {
 
-    public:
-
-    SharedPointer() {
+public:
+    SharedPointer() : ptr(nullptr), ref_count(new int(1)) {
         // Default constructs the pointer as null.
     }
 
-    SharedPointer(T* raw_pointer) {
+    SharedPointer(T* raw_pointer) : ptr(raw_pointer), ref_count(new int(1)) {
         // Captures a regular pointer and begins reference counting for it.
     }
 
-    SharedPointer(SharedPointer& other) {
+    SharedPointer(const SharedPointer& other) : ptr(other.ptr), ref_count(other.ref_count) {
         // Copies the assigned SharedPointer into the constructing instance.
+        ++(*ref_count);
     }
 
     ~SharedPointer() {
         // Destructor.
+        if (--(*ref_count) == 0) {
+            delete ptr;
+            delete ref_count;
+        }
     }
 
     SharedPointer& operator=(SharedPointer& other) {
         // Overwrites the assigned SharedPointer with the assigning SharedPointer.
+        if (this != &other) {
+            if (--(*ref_count) == 0) {
+                delete ptr;
+                delete ref_count;
+            }
+            ptr = other.ptr;
+            ref_count = other.ref_count;
+            ++(*ref_count);
+        }
+
+        return *this;
     }
 
     T& operator*() {
         // Returns a reference to the storage pointed by the wrapped pointer.
+        return *ptr;
     }
 
     T* operator->() {
         // Returns the wrapped pointer.
+        return ptr;
     }
 
     operator bool() {
         // Returns true if the wrapped pointer is not null.
-        return true;
+        return ptr != nullptr;
     }
-
+    
+private:
+    T* ptr;
+    int* ref_count;
 };
 
 #else
