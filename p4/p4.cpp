@@ -60,7 +60,7 @@ public:
         // Returns true if the wrapped pointer is not null.
         return ptr != nullptr;
     }
-    
+
 private:
     T* ptr;
     int* ref_count;
@@ -105,16 +105,27 @@ struct MyClass {
     ~MyClass() { std::cout << "MyClass destroyed\n"; }
 };
 
-int main() {
-    std::cout << "Hello, World!" << std::endl;
+// desc: A simple test function for the shared pointer implementation.
+// pre: None
+// post: In description
+void shared_pointer_test() {
+    std::cout << "Testing shared pointer" << std::endl;
 
-    // You may call the test drivers for your implementations here
     SharedPointer<MyClass> ptr1 = SharedPointer<MyClass>(new MyClass());
     {
-        SharedPointer<MyClass> ptr2 = ptr1; // Shared ownership
+        // Shared ownership
+        SharedPointer<MyClass> ptr2 = ptr1;
         std::cout << "ptr2 is sharing ownership with ptr1\n";
-    } // ptr2 goes out of scope, but the object is not destroyed because ptr1 still owns it
+    }
+    // ptr2 goes out of scope, but the object is not destroyed because ptr1 still owns it
 
     std::cout << "ptr1 is the last owner\n";
+}
+
+int main() {
+    
+    // You may call the test drivers for your implementations here
+    shared_pointer_test();
+
     return 0;
 }
