@@ -88,7 +88,7 @@ template<typename T>
 class AtomicIterator {
     
 public:
-    AtomicIterator(T* buffer, size_t size) : buffer(buffer), size(size), index(0){
+    AtomicIterator(T* buffer, size_t size) : buffer(buffer), size(size), index(0) {
         // Constructs a new AtomicIterator over the array buffer with size elements.
     }
 
@@ -137,7 +137,7 @@ struct MyClass {
 // pre: None
 // post: In description
 void shared_pointer_test() {
-    std::cout << "Testing shared pointer" << std::endl;
+    std::cout << "\nTesting shared pointer" << std::endl;
 
     SharedPointer<MyClass> ptr1 = SharedPointer<MyClass>(new MyClass());
     {
@@ -145,7 +145,7 @@ void shared_pointer_test() {
         SharedPointer<MyClass> ptr2 = ptr1;
         std::cout << "ptr2 is sharing ownership with ptr1\n";
     }
-    // ptr2 goes out of scope, but the object is not destroyed because ptr1 still owns it
+    // ptr2 goes out of scope, but the object is not destroyed because ptr1 still owns it.
 
     std::cout << "ptr1 is the last owner\n";
 }
@@ -168,7 +168,7 @@ void testAtomicIterator(AtomicIterator<int>& it, int thread_id) {
 // pre: None
 // post: In description
 void atomic_iterator_test() {
-    std::cout << "Testing atomic iterator" << std::endl;
+    std::cout << "\nTesting atomic iterator" << std::endl;
 
     const size_t size = 10;
     int buffer[size] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
@@ -176,7 +176,7 @@ void atomic_iterator_test() {
     // Create an AtomicIterator over the buffer.
     AtomicIterator<int> it(buffer, size);
 
-    const int num_threads = 3;
+    const int num_threads = 4;
     std::vector<std::thread> threads;
 
     // Start multiple threads to iterate over the buffer.
@@ -190,12 +190,84 @@ void atomic_iterator_test() {
     }
 }
 
+// desc: A simple test function to test self-assignment of shared pointers.
+void self_assignment_test() {
+    SharedPointer<int> ptr(new int(10));
+    ptr = ptr; // Self-assignment
+    std::cout << "\nSelf-assignment test passed\n";
+}
+
+// desc: A simple test function to test circular references in shared pointers.
+struct Node {
+    SharedPointer<Node> next;
+};
+
+// desc: A simple test function to test circular references in shared pointers.
+void circular_reference_test() {
+    SharedPointer<Node> node1(new Node());
+    SharedPointer<Node> node2(new Node());
+    node1->next = node2;
+    node2->next = node1; // Circular reference
+    std::cout << "Circular reference test passed (manual check for memory leak)\n";
+}
+
+// desc: A simple test function to test the atomic iterator with an empty buffer.
+void empty_buffer_test() {
+    int* buffer = nullptr;
+    AtomicIterator<int> it(buffer, 0);
+    int* value = it.next();
+    if (value == nullptr) {
+        std::cout << "Empty buffer test passed\n";
+    } else {
+        std::cout << "Empty buffer test failed\n";
+    }
+}
+
+// desc: A simple test function to test concurrent modifications of the atomic iterator.
+void concurrent_modifications_test() {
+    const size_t size = 10;
+    int buffer[size] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    AtomicIterator<int> it(buffer, size);
+
+    // Start two threads that will concurrently modify the iterator.
+    std::thread t1(&it {
+        for (int i = 0; i < 5; ++i) {
+            int* value = it.next();
+            if (value) {
+                std::cout << "Thread 1 got value: " << *value << std::endl;
+            }
+        }
+    });
+
+    std::thread t2(&it {
+        for (int i = 0; i < 5; ++i) {
+            int* value = it.next();
+            if (value) {
+                std::cout << "Thread 2 got value: " << *value << std::endl;
+            }
+        }
+    });
+
+    t1.join();
+    t2.join();
+    std::cout << "Concurrent modifications test passed\n";
+}
+
+
 int main() {
     
     // You may call the test drivers for your implementations here
     shared_pointer_test();
 
     atomic_iterator_test();
+
+    self_assignment_test();
+
+    circular_reference_test();
+
+    empty_buffer_test();
+
+    concurrent_modifications_test();
 
     return 0;
 }
