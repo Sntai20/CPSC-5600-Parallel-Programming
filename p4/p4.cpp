@@ -20,7 +20,7 @@ public:
         // Captures a regular pointer and begins reference counting for it.
     }
 
-    SharedPointer(const SharedPointer& other) : ptr(other.ptr), ref_count(other.ref_count) {
+    SharedPointer(SharedPointer& other) : ptr(other.ptr), ref_count(other.ref_count) {
         // Copies the assigned SharedPointer into the constructing instance.
         ++(*ref_count);
     }
@@ -92,11 +92,11 @@ public:
         // Constructs a new AtomicIterator over the array buffer with size elements.
     }
 
-    AtomicIterator(const AtomicIterator& other) : buffer(other.buffer), size(other.size), index(other.index.load()) {
+    AtomicIterator(AtomicIterator& other) : buffer(other.buffer), size(other.size), index(other.index.load()) {
         // Copies the assigned AtomicIterator to the constructing instance.
     }
 
-    AtomicIterator& operator=(const AtomicIterator& other) {
+    AtomicIterator& operator=(AtomicIterator& other) {
         // Overwrites the assigned AtomicIterator with the assigning AtomicIterator.
         if (this != &other) {
             buffer = other.buffer;
