@@ -80,3 +80,13 @@ To compile the program with the custom class enabled, comment out line 7 and 8, 
 p3: p3.cpp Makefile
 	g++ p3.cpp -o out/p3 -lpthread -Wall -Werror --std=c++20 -DCUSTOM_BARRIER
 ```
+
+## P5: K-Means Clustering using MPI
+
+The program requires exactly two arguments, both positive integers. The first argument is the cluster count and the second argument is the point count. The following is an example of running the p5 program in the p5 folder:
+
+```bash
+module load mpi
+make -C p5
+mpiexec p5/out/p5 1 1
+```
