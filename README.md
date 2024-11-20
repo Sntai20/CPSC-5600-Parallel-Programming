@@ -86,7 +86,22 @@ p3: p3.cpp Makefile
 The program requires exactly two arguments, both positive integers. The first argument is the cluster count and the second argument is the point count. The following is an example of running the p5 program in the p5 folder:
 
 ```bash
-module load mpi
+module try-add mpi
 make -C p5
-mpiexec p5/out/p5 3 200
+mpiexec p5/out/p5 10 300
 ```
+
+### Valgrind
+
+Valgrind is a memory management analysis tool.
+
+```bash
+mpirun -n 2 valgrind ./p5/out/p5 10 300
+```
+
+### Gathering Data
+
+Gather the runtime of parallel_k_means for the following cluster counts and points counts (per generated cluster):
+
+- Cluster Counts: [ 2, 3, 4, 5, 6 ]
+- Point Counts: [ 100000, 200000, 300000, 400000, 500000 ]

@@ -2,8 +2,8 @@ import argparse
 import subprocess
 import math
 
-add_counts = [ 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000 ]
-mul_counts = [ 1, 2, 3, 4, 5, 6, 7, 8 ]
+add_counts = [ 2, 3, 4, 5, 6 ]
+mul_counts = [ 100000, 200000, 300000, 400000, 500000 ]
 
 sample_count = 10
 
