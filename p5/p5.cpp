@@ -130,36 +130,26 @@ ClusterList k_means(std::vector<Point> points,size_t cluster_count) {
 
 // desc: This is the function that you need to parallelize with MPI
 //       The signature of this function should not be changed.
-ClusterList parallel_k_means(std::vector<Point> points,size_t cluster_count) {
-    MPI_Init(nullptr, nullptr);
-
-    // int process_count;
-    // MPI_Comm_size(MPI_COMM_WORLD, &process_count);
-
-    // Get the rank of the process.
-    int rank;
+ClusterList parallel_k_means(std::vector<Point> points, size_t cluster_count) {
+    
+    int rank, size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-    // Get the number of processes running in parallel.
-    int size;
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
     std::vector<Point> centers(cluster_count);
     if (rank == 0) {
-        // Initialize centers with random points
         srand(time(0));
         for (Point& point : centers) {
             point = {(float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000};
         }
     }
 
-    // Broadcast centers to all processes.
-    MPI_Bcast(
-        centers.data(),
-        cluster_count * sizeof(Point),
-        MPI_BYTE,
-        0,
-        MPI_COMM_WORLD);
+    MPI_Bcast(centers.data(), cluster_count * sizeof(Point), MPI_BYTE, 0, MPI_COMM_WORLD);
+
+    size_t points_per_process = points.size() / size;
+    std::vector<Point> local_points(points_per_process);
+    MPI_Scatter(points.data(), points_per_process * sizeof(Point), MPI_BYTE,
+                local_points.data(), points_per_process * sizeof(Point), MPI_BYTE, 0, MPI_COMM_WORLD);
 
     ClusterList clusters(cluster_count);
     bool converged = false;
@@ -167,53 +157,55 @@ ClusterList parallel_k_means(std::vector<Point> points,size_t cluster_count) {
     size_t iteration_count = 0;
 
     while ((!converged) && (iteration_count < iteration_limit)) {
-        // Scatter points to all processes.
-        std::vector<Point> local_points(points.size() / size);
-        MPI_Scatter(
-            points.data(),
-            points.size() / size * sizeof(Point),
-            MPI_BYTE,
-            local_points.data(),
-            points.size() / size * sizeof(Point),
-            MPI_BYTE,
-            0,
-            MPI_COMM_WORLD);
-
-        // Each process reassigns points to clusters.
         ClusterList local_clusters = reassign(clusters, centers);
 
-        // Gather clusters from all processes.
-        MPI_Gather(
-            local_clusters.data(),
-            local_clusters.size() * sizeof(Point),
-            MPI_BYTE,
-            clusters.data(),
-            local_clusters.size() * sizeof(Point),
-            MPI_BYTE,
-            0,
-            MPI_COMM_WORLD);
+        std::vector<Point> new_centers(cluster_count);
+        std::vector<int> counts(cluster_count, 0);
 
-        if (rank == 0) {
-            // Recenter clusters and check for convergence.
-            converged = recenter(clusters, centers);
+        for (size_t i = 0; i < cluster_count; ++i) {
+            for (const Point& point : local_clusters[i]) {
+                new_centers[i].x += point.x;
+                new_centers[i].y += point.y;
+                counts[i]++;
+            }
         }
 
-        // Broadcast convergence status to all processes.
-        MPI_Bcast(
-            &converged,
-            1,
-            MPI_C_BOOL,
-            0,
-            MPI_COMM_WORLD);
+        MPI_Allreduce(MPI_IN_PLACE, new_centers.data(), cluster_count * sizeof(Point), MPI_BYTE, MPI_SUM, MPI_COMM_WORLD);
+        MPI_Allreduce(MPI_IN_PLACE, counts.data(), cluster_count, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+
+        for (size_t i = 0; i < cluster_count; ++i) {
+            if (counts[i] > 0) {
+                new_centers[i].x /= counts[i];
+                new_centers[i].y /= counts[i];
+            }
+        }
+
+        if (rank == 0) {
+            converged = true;
+            for (size_t i = 0; i < cluster_count; ++i) {
+                if (distance(new_centers[i], centers[i]) > 1e-4) {
+                    converged = false;
+                    centers[i] = new_centers[i];
+                }
+            }
+        }
+
+        MPI_Bcast(&converged, 1, MPI_C_BOOL, 0, MPI_COMM_WORLD);
+        MPI_Bcast(centers.data(), cluster_count * sizeof(Point), MPI_BYTE, 0, MPI_COMM_WORLD);
+
         iteration_count++;
     }
 
-    MPI_Finalize();
+    MPI_Gather(local_points.data(), points_per_process * sizeof(Point), MPI_BYTE,
+               points.data(), points_per_process * sizeof(Point), MPI_BYTE, 0, MPI_COMM_WORLD);
+
     return clusters;
 }
 
 
 int main(int argc, char *argv[]) {
+
+    MPI_Init(&argc, &argv);
 
     int cluster_count, point_count;
     get_args(argc,argv,cluster_count,point_count);
@@ -232,10 +224,12 @@ int main(int argc, char *argv[]) {
     std::vector<Point> collapsed = collapse_cluster_list(list);
 
     // Attempt to find the clusters again
-    ClusterList kmeans = k_means(collapsed,cluster_count);
+    // ClusterList kmeans = k_means(collapsed,cluster_count);
+    ClusterList kmeans = parallel_k_means(collapsed, cluster_count);
 
     // Display the clusters, as found by the k_means algorithms
     display_clusters(kmeans,{0,0},{1,1},40,true);
 
+    MPI_Finalize();
     return 0;
 }
