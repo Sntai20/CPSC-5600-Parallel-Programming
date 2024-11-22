@@ -104,6 +104,8 @@ ClusterList reassign(ClusterList cluster_list, std::vector<Point> centers) {
 
 // desc: A serial version of k_means
 ClusterList k_means(std::vector<Point> points,size_t cluster_count) {
+
+    // Initialize the cluster centers
     std::vector<Point> centers;
     centers.resize(cluster_count);
 
@@ -113,17 +115,25 @@ ClusterList k_means(std::vector<Point> points,size_t cluster_count) {
         point = {(float)(rand()%1000)/1000,(float)(rand()%1000)/1000};
     }
 
+    // Perform the k-means algorithm
     ClusterList clusters;
     clusters.resize(cluster_count);
     clusters[0] = points;
     bool converged = false;
     size_t iteration_limit = 50;
     size_t iteration_count = 0;
+
+    // Initialize the clusters with the points
     while( (!converged) && (iteration_count < iteration_limit) ) {
+
+        // Reassign the points to the clusters.
         clusters  = reassign(clusters,centers);
+
+        // Recenter the clusters.
         converged = recenter(clusters,centers);
         iteration_count++;
     }
+
     return clusters;
 }
 
@@ -143,7 +153,8 @@ ClusterList parallel_k_means(std::vector<Point> points, size_t cluster_count) {
     // Initialize the cluster centers on the root process.
     std::vector<Point> centers(cluster_count);
     if (rank == 0) {
-        srand(time(0));
+        // Give each center a random offset within our bounds
+        // (for this project, we assume both x and y are between 0 and 1)
         for (Point& point : centers) {
             point = {(float)(rand() % 1000) / 1000, (float)(rand() % 1000) / 1000};
         }
@@ -178,6 +189,8 @@ ClusterList parallel_k_means(std::vector<Point> points, size_t cluster_count) {
 
     // Initialize the clusters with the local points.
     while ((!converged) && (iteration_count < iteration_limit)) {
+
+        // Reassign the local points to the clusters.
         ClusterList local_clusters = reassign(clusters, centers);
 
         // Reduce the local clusters to the global clusters.
@@ -273,7 +286,14 @@ int main(int argc, char *argv[]) {
     int cluster_count, point_count;
     get_args(argc,argv,cluster_count,point_count);
 
+    // Seed the random number generator.
     srand(time(nullptr));
+     
+    // A Point is a struct with two floats, x and y.
+    // A cluster is a vector of points.
+    // A cluster list is a vector of clusters.
+
+    // Define the bounds of the clusters.
     Point lower_bounds = {0,0};
     Point upper_bounds = {1,1};
 
