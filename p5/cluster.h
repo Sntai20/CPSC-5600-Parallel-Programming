@@ -15,7 +15,7 @@ using Cluster = std::vector<Point>;
 using ClusterList = std::vector<Cluster>;
 
 
-// desc: Displays the provided cluster list, using lower_bounds and upper_bounds to determing the
+// desc: Displays the provided cluster list, using lower_bounds and upper_bounds to determine the
 //       minimum/maximum x and y coordinates that will be viewable in the rendered image. The size of the
 //       rendered image is scaled by `scale` and categories are color-coded when `color` is true
 //  pre: The supplied cluster list must have 26 or fewer elements, since it uses letters to distinguish
@@ -23,7 +23,7 @@ using ClusterList = std::vector<Cluster>;
 // post:
 void display_clusters(ClusterList list, Point lower_bounds, Point upper_bounds, float scale, bool color);
 
-// desc: Generates a cluster centered at `center` with `count` points and an averge spread of `spread`
+// desc: Generates a cluster centered at `center` with `count` points and an average spread of `spread`
 //  pre: None
 // post: None, aside from description
 Cluster generate_cluster(Point center, size_t count, float spread);
@@ -39,4 +39,3 @@ ClusterList generate_cluster_list(Point lower_bounds, Point upper_bounds, size_t
 //  pre: None
 // post: None
 Cluster collapse_cluster_list(ClusterList list);
-

@@ -11,7 +11,7 @@ float rand_norm() {
     return (rand()%RAND_MAX)/((float)RAND_MAX);
 }
 
-
+// Generate a cluster centered at center with count points and an average spread of spread.
 Cluster generate_cluster(Point center, size_t count, float spread) {
     Cluster result;
     for(size_t i=0; i<count; i++){
@@ -27,6 +27,7 @@ Cluster generate_cluster(Point center, size_t count, float spread) {
     return result;
 };
 
+// Generate a list of clusters with random centers and spreads within the given bounds and counts of points per cluster.
 ClusterList generate_cluster_list(Point lower_bounds, Point upper_bounds, size_t cluster_count, size_t point_count) {
     float width = (upper_bounds.x-lower_bounds.x);
     float height = (upper_bounds.y-lower_bounds.y);
