@@ -132,10 +132,15 @@ ClusterList k_means(std::vector<Point> points,size_t cluster_count) {
 //       The signature of this function should not be changed.
 ClusterList parallel_k_means(std::vector<Point> points, size_t cluster_count) {
     
-    int rank, size;
+    // Get the rank of the current process.
+    int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    
+    // Get the total number of processes.
+    int size;
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
+    // Initialize the cluster centers on the root process.
     std::vector<Point> centers(cluster_count);
     if (rank == 0) {
         srand(time(0));
@@ -144,25 +149,45 @@ ClusterList parallel_k_means(std::vector<Point> points, size_t cluster_count) {
         }
     }
 
-    MPI_Bcast(centers.data(), cluster_count * sizeof(Point), MPI_BYTE, 0, MPI_COMM_WORLD);
+    // Broadcast the cluster centers.
+    MPI_Bcast(
+        centers.data(),
+        cluster_count * sizeof(Point),
+        MPI_BYTE,
+        0,
+        MPI_COMM_WORLD);
 
+    // Scatter the points to all processes.
     size_t points_per_process = points.size() / size;
     std::vector<Point> local_points(points_per_process);
-    MPI_Scatter(points.data(), points_per_process * sizeof(Point), MPI_BYTE,
-                local_points.data(), points_per_process * sizeof(Point), MPI_BYTE, 0, MPI_COMM_WORLD);
+    MPI_Scatter(
+        points.data(),
+        points_per_process * sizeof(Point),
+        MPI_BYTE,
+        local_points.data(),
+        points_per_process * sizeof(Point),
+        MPI_BYTE,
+        0,
+        MPI_COMM_WORLD);
 
+    // Perform the k-means algorithm.
     ClusterList clusters(cluster_count);
     bool converged = false;
     size_t iteration_limit = 50;
     size_t iteration_count = 0;
 
+    // Initialize the clusters with the local points.
     while ((!converged) && (iteration_count < iteration_limit)) {
         ClusterList local_clusters = reassign(clusters, centers);
 
+        // Reduce the local clusters to the global clusters.
         std::vector<Point> new_centers(cluster_count);
         std::vector<int> counts(cluster_count, 0);
 
+        // Calculate the new centers.
         for (size_t i = 0; i < cluster_count; ++i) {
+
+            // Initialize the new centers.
             for (const Point& point : local_clusters[i]) {
                 new_centers[i].x += point.x;
                 new_centers[i].y += point.y;
@@ -170,9 +195,25 @@ ClusterList parallel_k_means(std::vector<Point> points, size_t cluster_count) {
             }
         }
 
-        MPI_Allreduce(MPI_IN_PLACE, new_centers.data(), cluster_count * sizeof(Point), MPI_BYTE, MPI_SUM, MPI_COMM_WORLD);
-        MPI_Allreduce(MPI_IN_PLACE, counts.data(), cluster_count, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+        // Reduce the new centers.
+        MPI_Allreduce(
+            MPI_IN_PLACE,
+            new_centers.data(),
+            cluster_count * sizeof(Point),
+            MPI_BYTE,
+            MPI_SUM,
+            MPI_COMM_WORLD);
 
+        // Reduce the counts.
+        MPI_Allreduce(
+            MPI_IN_PLACE,
+            counts.data(),
+            cluster_count,
+            MPI_INT,
+            MPI_SUM,
+            MPI_COMM_WORLD);
+
+        // Calculate the new centers.
         for (size_t i = 0; i < cluster_count; ++i) {
             if (counts[i] > 0) {
                 new_centers[i].x /= counts[i];
@@ -180,6 +221,7 @@ ClusterList parallel_k_means(std::vector<Point> points, size_t cluster_count) {
             }
         }
 
+        // Check for convergence.
         if (rank == 0) {
             converged = true;
             for (size_t i = 0; i < cluster_count; ++i) {
@@ -190,14 +232,35 @@ ClusterList parallel_k_means(std::vector<Point> points, size_t cluster_count) {
             }
         }
 
-        MPI_Bcast(&converged, 1, MPI_C_BOOL, 0, MPI_COMM_WORLD);
-        MPI_Bcast(centers.data(), cluster_count * sizeof(Point), MPI_BYTE, 0, MPI_COMM_WORLD);
+        // Broadcast the convergence status.
+        MPI_Bcast(
+            &converged,
+            1,
+            MPI_C_BOOL,
+            0,
+            MPI_COMM_WORLD);
+
+        // Broadcast the new centers.
+        MPI_Bcast(
+            centers.data(),
+            cluster_count * sizeof(Point),
+            MPI_BYTE,
+            0,
+            MPI_COMM_WORLD);
 
         iteration_count++;
     }
 
-    MPI_Gather(local_points.data(), points_per_process * sizeof(Point), MPI_BYTE,
-               points.data(), points_per_process * sizeof(Point), MPI_BYTE, 0, MPI_COMM_WORLD);
+    // Gather the local points to the global points.
+    MPI_Gather(
+        local_points.data(),
+        points_per_process * sizeof(Point),
+        MPI_BYTE,
+        points.data(),
+        points_per_process * sizeof(Point),
+        MPI_BYTE,
+        0,
+        MPI_COMM_WORLD);
 
     return clusters;
 }
