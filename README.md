@@ -105,3 +105,9 @@ Gather the runtime of parallel_k_means for the following cluster counts and poin
 
 - Cluster Counts: [ 2, 3, 4, 5, 6 ]
 - Point Counts: [ 100000, 200000, 300000, 400000, 500000 ]
+
+```bash
+module try-add mpi
+make -C p5
+python AutomateDataCollection.py --mpi p5 p5
+```
