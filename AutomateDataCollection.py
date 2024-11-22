@@ -13,6 +13,7 @@ def main():
     parser.add_argument('--nosample', action='store_true', help='Disable sampling')
     parser.add_argument('project_name', type=str, help='Input project name string where the program is in')
     parser.add_argument('program_name', type=str, help='Input program name string to process')
+    parser.add_argument('--mpi', action='store_true', help='Use mpiexec')
     
     args = parser.parse_args()
     print(f"Project name: {args.project_name}")
@@ -37,10 +38,15 @@ def main():
         print("Sampling is enabled.")
         for i in add_counts:
             for j in mul_counts:
-                cmd = [ f"{args.project_name}/out/{args.program_name}", str(i), str(j) ]
+                if args.mpi:
+                    cmd = ["/usr/lib64/openmpi/bin/mpiexec", "-np", "4", f"{args.project_name}/out/{args.program_name}", str(i), str(j)]
+                else:
+                    cmd = [ f"{args.project_name}/out/{args.program_name}", str(i), str(j) ]
+                
                 output_str = subprocess \
                     .run(cmd,stdout=subprocess.PIPE) \
                     .stdout.decode('utf-8')
+
                 # Ignore if output_str is empty.
                 if (output_str != ''):
                     time = float(output_str)
