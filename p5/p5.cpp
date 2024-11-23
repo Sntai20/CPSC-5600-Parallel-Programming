@@ -291,6 +291,9 @@ ClusterList parallel_k_means(std::vector<Point> points, size_t cluster_count) {
 int main(int argc, char *argv[]) {
     MPI_Init(&argc, &argv);
 
+    int my_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+
     int cluster_count, point_count;
     get_args(argc, argv, cluster_count, point_count);
 
@@ -309,17 +312,28 @@ int main(int argc, char *argv[]) {
     ClusterList list = generate_cluster_list(lower_bounds, upper_bounds, cluster_count, point_count);
 
     // Show how they were generated.
-    display_clusters(list, {0, 0}, {1, 1}, 40, true);
+    // display_clusters(list, {0, 0}, {1, 1}, 40, true);
 
     // Make a list of the points, with cluster information removed.
     std::vector<Point> collapsed = collapse_cluster_list(list);
 
+    TimePoint start_time = steady_clock::now();
     // Attempt to find the clusters again.
     // ClusterList kmeans = k_means(collapsed,cluster_count);
     ClusterList kmeans = parallel_k_means(collapsed, cluster_count);
+    TimePoint end_time = steady_clock::now();
+
+    TimeSpan runtime = duration_cast<TimeSpan>(end_time - start_time);
+
+    // Print the output
+    if(my_rank == 0){
+        std::cout << "Cluster count: " << cluster_count << " Point count: " << point_count << " Runtime: " << runtime.count() << std::endl;
+    }    
+    
+    // std::cout << runtime.count() << ",";
 
     // Display the clusters, as found by the k_means algorithms.
-    display_clusters(kmeans, {0, 0}, {1, 1}, 40, true);
+    // display_clusters(kmeans, {0, 0}, {1, 1}, 40, true);
 
     MPI_Finalize();
     return 0;
