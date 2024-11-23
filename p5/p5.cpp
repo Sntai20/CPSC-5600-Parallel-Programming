@@ -213,34 +213,38 @@ ClusterList parallel_k_means(std::vector<Point> points, size_t cluster_count) {
             }
         }
 
-        // Reduce the new centers.
-        MPI_Allreduce(
-            MPI_IN_PLACE,
+        // Reduce the new centers and counts.
+        std::vector<Point> global_new_centers(cluster_count);
+        std::vector<int> global_counts(cluster_count);
+
+        MPI_Reduce(
             new_centers.data(),
+            global_new_centers.data(),
             cluster_count * sizeof(Point),
             MPI_BYTE,
             MPI_SUM,
+            0,
             MPI_COMM_WORLD);
 
-        // Reduce the counts.
-        MPI_Allreduce(
-            MPI_IN_PLACE,
+        MPI_Reduce(
             counts.data(),
+            global_counts.data(),
             cluster_count,
             MPI_INT,
             MPI_SUM,
+            0,
             MPI_COMM_WORLD);
 
-        // Calculate the new centers.
-        for (size_t i = 0; i < cluster_count; ++i) {
-            if (counts[i] > 0) {
-                new_centers[i].x /= counts[i];
-                new_centers[i].y /= counts[i];
-            }
-        }
-
-        // Check for convergence.
         if (rank == 0) {
+            for (size_t i = 0; i < cluster_count; ++i) {
+
+                // Calculate the new centers.
+                if (global_counts[i] > 0) {
+                    global_new_centers[i].x /= global_counts[i];
+                    global_new_centers[i].y /= global_counts[i];
+                }
+            }
+
             converged = true;
             for (size_t i = 0; i < cluster_count; ++i) {
                 // If the distance between the new center and the old center
@@ -249,7 +253,7 @@ ClusterList parallel_k_means(std::vector<Point> points, size_t cluster_count) {
                 // than 1/10,000, then we consider them to be the same.
                 if (distance(new_centers[i], centers[i]) > 1e-4) {
                     converged = false;
-                    centers[i] = new_centers[i];
+                    centers[i] = global_new_centers[i];
                 }
             }
         }
