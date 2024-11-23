@@ -2,8 +2,13 @@
 #include <iostream>
 #include <limits>
 #include <mpi.h>
+#include <chrono>
 
-
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+using std::chrono::steady_clock;
+using TimePoint = std::chrono::steady_clock::time_point;
+using TimeSpan = std::chrono::duration<double>;
 
 
 std::string const USAGE = "Program requires exactly two arguments, both positive integers.\n";
@@ -238,6 +243,10 @@ ClusterList parallel_k_means(std::vector<Point> points, size_t cluster_count) {
         if (rank == 0) {
             converged = true;
             for (size_t i = 0; i < cluster_count; ++i) {
+                // If the distance between the new center and the old center
+                // is less than 1e-4, then the centers have converged.
+                // 1e-4 is 0.0001, or 1/10,000. If the centers are closer
+                // than 1/10,000, then we consider them to be the same.
                 if (distance(new_centers[i], centers[i]) > 1e-4) {
                     converged = false;
                     centers[i] = new_centers[i];
