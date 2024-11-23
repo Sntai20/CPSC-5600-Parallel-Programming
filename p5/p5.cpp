@@ -371,7 +371,7 @@ void gather_serial_results(
     }
 }
 
-
+// To run the program I used: mpiexec -np 20 p5
 int main(int argc, char *argv[]) {
     MPI_Init(&argc, &argv);
 
