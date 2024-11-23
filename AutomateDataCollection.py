@@ -39,7 +39,7 @@ def main():
         for i in add_counts:
             for j in mul_counts:
                 if args.mpi:
-                    cmd = ["/usr/lib64/openmpi/bin/mpiexec", "-np", "4", f"{args.project_name}/out/{args.program_name}", str(i), str(j)]
+                    cmd = ["/usr/lib64/openmpi/bin/mpiexec", "-np", "20", f"{args.project_name}/out/{args.program_name}", str(i), str(j)]
                 else:
                     cmd = [ f"{args.project_name}/out/{args.program_name}", str(i), str(j) ]
                 
