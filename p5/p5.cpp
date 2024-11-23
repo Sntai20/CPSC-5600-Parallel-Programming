@@ -105,7 +105,7 @@ ClusterList reassign(ClusterList cluster_list, std::vector<Point> centers) {
 // desc: A serial version of k_means
 ClusterList k_means(std::vector<Point> points,size_t cluster_count) {
 
-    // Initialize the cluster centers
+    // Initialize the cluster centers.
     std::vector<Point> centers;
     centers.resize(cluster_count);
 
@@ -115,7 +115,7 @@ ClusterList k_means(std::vector<Point> points,size_t cluster_count) {
         point = {(float)(rand()%1000)/1000,(float)(rand()%1000)/1000};
     }
 
-    // Perform the k-means algorithm
+    // Perform the k-means algorithm.
     ClusterList clusters;
     clusters.resize(cluster_count);
     clusters[0] = points;
@@ -123,7 +123,7 @@ ClusterList k_means(std::vector<Point> points,size_t cluster_count) {
     size_t iteration_limit = 50;
     size_t iteration_count = 0;
 
-    // Initialize the clusters with the points
+    // Reassign and recenter, while the clusters are not converged and we haven't reached the iteration limit.
     while( (!converged) && (iteration_count < iteration_limit) ) {
 
         // Reassign the points to the clusters.
@@ -297,20 +297,20 @@ int main(int argc, char *argv[]) {
     Point lower_bounds = {0,0};
     Point upper_bounds = {1,1};
 
-    // Procedurally generate a set of clusters
+    // Procedurally generate a set of clusters.
     ClusterList list = generate_cluster_list(lower_bounds,upper_bounds,cluster_count,point_count);
 
-    // Show how they were generated
+    // Show how they were generated.
     display_clusters(list,{0,0},{1,1},40,true);
 
-    // Make a list of the points, with cluster information removed
+    // Make a list of the points, with cluster information removed.
     std::vector<Point> collapsed = collapse_cluster_list(list);
 
-    // Attempt to find the clusters again
+    // Attempt to find the clusters again.
     // ClusterList kmeans = k_means(collapsed,cluster_count);
     ClusterList kmeans = parallel_k_means(collapsed, cluster_count);
 
-    // Display the clusters, as found by the k_means algorithms
+    // Display the clusters, as found by the k_means algorithms.
     display_clusters(kmeans,{0,0},{1,1},40,true);
 
     MPI_Finalize();
