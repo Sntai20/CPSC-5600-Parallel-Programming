@@ -291,6 +291,7 @@ ClusterList parallel_k_means(std::vector<Point> points, size_t cluster_count) {
     return clusters;
 }
 
+// desc: Gather the parallel results.
 void gather_parallel_results(
     Point lower_bounds,
     Point upper_bounds,
