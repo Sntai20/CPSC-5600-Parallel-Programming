@@ -280,28 +280,27 @@ ClusterList parallel_k_means(std::vector<Point> points, size_t cluster_count) {
 
 
 int main(int argc, char *argv[]) {
-
     MPI_Init(&argc, &argv);
 
     int cluster_count, point_count;
-    get_args(argc,argv,cluster_count,point_count);
+    get_args(argc, argv, cluster_count, point_count);
 
     // Seed the random number generator.
     srand(time(nullptr));
-     
+
     // A Point is a struct with two floats, x and y.
     // A cluster is a vector of points.
     // A cluster list is a vector of clusters.
 
     // Define the bounds of the clusters.
-    Point lower_bounds = {0,0};
-    Point upper_bounds = {1,1};
+    Point lower_bounds = {0, 0};
+    Point upper_bounds = {1, 1};
 
     // Procedurally generate a set of clusters.
-    ClusterList list = generate_cluster_list(lower_bounds,upper_bounds,cluster_count,point_count);
+    ClusterList list = generate_cluster_list(lower_bounds, upper_bounds, cluster_count, point_count);
 
     // Show how they were generated.
-    display_clusters(list,{0,0},{1,1},40,true);
+    display_clusters(list, {0, 0}, {1, 1}, 40, true);
 
     // Make a list of the points, with cluster information removed.
     std::vector<Point> collapsed = collapse_cluster_list(list);
@@ -311,7 +310,7 @@ int main(int argc, char *argv[]) {
     ClusterList kmeans = parallel_k_means(collapsed, cluster_count);
 
     // Display the clusters, as found by the k_means algorithms.
-    display_clusters(kmeans,{0,0},{1,1},40,true);
+    display_clusters(kmeans, {0, 0}, {1, 1}, 40, true);
 
     MPI_Finalize();
     return 0;
