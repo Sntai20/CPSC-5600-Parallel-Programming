@@ -88,7 +88,7 @@ The program requires exactly two arguments, both positive integers. The first ar
 ```bash
 module try-add mpi
 make -C p5
-mpiexec -np 4 p5/out/p5 2 1000
+mpiexec -np 30 p5/out/p5 3 10000
 ```
 
 ### Valgrind
@@ -96,7 +96,7 @@ mpiexec -np 4 p5/out/p5 2 1000
 Valgrind is a memory management analysis tool.
 
 ```bash
-mpirun -n 2 valgrind ./p5/out/p5 10 300
+mpirun -n 2 valgrind ./p5/out/p5 3 10000
 ```
 
 ### Gathering Data
