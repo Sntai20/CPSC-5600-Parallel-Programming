@@ -111,3 +111,7 @@ module try-add mpi
 make -C p5
 python AutomateDataCollection.py --mpi p5 p5
 ```
+
+### References
+
+- [Parallel Processing](https://braxtoncuneo.github.io/parallel/intro.html)
