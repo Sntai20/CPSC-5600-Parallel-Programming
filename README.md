@@ -112,12 +112,21 @@ make -C p5
 python AutomateDataCollection.py --mpi p5 p5
 ```
 
-## P6: CUDA Sort and Scan
+## CUDA Basics
 
 ```bash
 git config --global user.email "ansantan@outlook.com"
 git config --global user.name "Antonio Santana"
 nvcc hello_gpu.cu -o out/hello_gpu
+```
+
+## P6: CUDA Sort and Scan
+
+- bitonic_naive.cu -- a naive CUDA implementation of bitonic sort, which only sorts arrays up to 1024 elements whose size is a power of 2.
+- reduce_scan_1block.cu -- a naive CUDA implementation of parallel prefix scan
+
+```bash
+nvcc p6/bitonic_naive.cu -o p6/out/bitonic_native
 ```
 
 
