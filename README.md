@@ -123,12 +123,22 @@ nvcc hello_gpu.cu -o out/hello_gpu
 ## P6: CUDA Sort and Scan
 
 - bitonic_naive.cu -- a naive CUDA implementation of bitonic sort, which only sorts arrays up to 1024 elements whose size is a power of 2.
-- reduce_scan_1block.cu -- a naive CUDA implementation of parallel prefix scan
 
 ```bash
+mkdir p6/out
 nvcc p6/bitonic_naive.cu -o p6/out/bitonic_native
+p6/out/bitonic_native
+256
 ```
 
+- reduce_scan_1block.cu -- a naive CUDA implementation of parallel prefix scan.
+
+```bash
+mkdir p6/out
+nvcc p6/reduce_scan_1block.cu -o p6/out/reduce_scan_1block
+p6/out/reduce_scan_1block
+256
+```
 
 ### References
 
