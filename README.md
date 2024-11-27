@@ -112,6 +112,15 @@ make -C p5
 python AutomateDataCollection.py --mpi p5 p5
 ```
 
+## P6: CUDA Sort and Scan
+
+```bash
+git config --global user.email "ansantan@outlook.com"
+git config --global user.name "Antonio Santana"
+nvcc hello_gpu.cu -o out/hello_gpu
+```
+
+
 ### References
 
 - [Parallel Processing](https://braxtoncuneo.github.io/parallel/intro.html)
