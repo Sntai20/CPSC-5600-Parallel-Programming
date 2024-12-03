@@ -140,6 +140,12 @@ p6/out/reduce_scan_1block
 256
 ```
 
+## Warp Divergence Lecture
+
+```bash
+nvcc cuda-lecture/procon.cu -o cuda-lecture/out/procon
+```
+
 ### References
 
 - [Parallel Processing](https://braxtoncuneo.github.io/parallel/intro.html)
