@@ -13,8 +13,6 @@
 #include "constants.h"
 using namespace std;
 
-// const int MAX_BLOCK_SIZE = 1024;
-
 __global__ void allreduce(float *data) {
 	__shared__ float local[MAX_BLOCK_SIZE]; // 10x faster at least than global memory via data[]
         int gindex = threadIdx.x;

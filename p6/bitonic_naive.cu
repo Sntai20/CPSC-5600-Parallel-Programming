@@ -44,7 +44,6 @@ __global__ void bitonic(float *data, int k) {
 }
 
 int bitonic_naive_sort() {
-	// const int MAX_BLOCK_SIZE = 1024; // true for all CUDA architectures so far
 	int n;
 	cout << "n = ? (must be power of 2): ";
 	cin >> n;
