@@ -122,6 +122,14 @@ nvcc hello_gpu.cu -o out/hello_gpu
 
 ## P6: CUDA Sort and Scan
 
+- p6.cu -- A refactored version of the started code with parallelization. The Makefile builds the other files into an executable named p6 if the make p6 command is called.
+
+```bash
+mkdir p6/out
+nvcc p6/p6.cu -o p6/out/p6
+p6/out/p6
+```
+
 - bitonic_naive.cu -- a naive CUDA implementation of bitonic sort, which only sorts arrays up to 1024 elements whose size is a power of 2.
 
 ```bash
