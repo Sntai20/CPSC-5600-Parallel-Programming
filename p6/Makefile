@@ -1,25 +1,34 @@
 # Makefile for compiling p6.cu
 
-# Compiler
 NVCC = nvcc
+CFLAGS = -arch=sm_60
+TARGET_DIR = out
+TARGET = $(TARGET_DIR)/p6
 
-# Source file
-SRC = p6.cu bitonic_naive.cu reduce_scan_1block.cu
+# Source files
+SRCS = p6.cu bitonic_naive.cu reduce_scan_1block.cu
+OBJS = $(SRCS:.cu=.o)
 
-# Output directory and file
-OUT_DIR = out
-OUT = $(OUT_DIR)/p6
+# Header files
+HEADERS = bitonic_naive.h reduce_scan_1block.h
 
 # Default target
-all: $(OUT)
+all: $(TARGET_DIR) $(TARGET)
 
-# Rule to compile the CUDA source file
-$(OUT): $(SRC)
-	@mkdir -p $(OUT_DIR)
-	$(NVCC) $(SRC) -o $(OUT)
+$(TARGET_DIR):
+	mkdir -p $(TARGET_DIR)
 
-# Clean target to remove compiled files
+# Target to compile the CUDA source files
+$(TARGET): $(OBJS)
+	$(NVCC) $(CFLAGS) -o $@ $^
+
+# Target to compile the header files
+%.o: %.cu $(HEADERS)
+	$(NVCC) $(CFLAGS) -c $< -o $@
+
+# Target to clean the directory
 clean:
-	rm -f $(OUT)
+	rm -f $(OBJS) $(TARGET)
+	rm -rf $(TARGET_DIR)
 
-.PHONY: all clean
+.PHONY: clean
