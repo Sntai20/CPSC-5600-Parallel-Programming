@@ -42,3 +42,43 @@ __global__ void bitonic(float *data, int k) {
 		__syncthreads();
 	}
 }
+
+int bitonic_naive_sort() {
+	// const int MAX_BLOCK_SIZE = 1024; // true for all CUDA architectures so far
+	int n;
+	cout << "n = ? (must be power of 2): ";
+	cin >> n;
+	if (n > MAX_BLOCK_SIZE || pow(2,floor(log2(n))) != n) {
+		cerr << "n must be power of 2 and <= " << MAX_BLOCK_SIZE << endl;
+		return 1;
+	}
+
+	// use managed memory for the data array
+	float *data;
+	cudaMallocManaged(&data, n * sizeof(*data));
+
+	// fill it with random values
+	random_device r;
+	default_random_engine gen(r());
+	uniform_real_distribution<float> rand(-3.14, +3.14);
+	for (int i = 0; i < n; i++)
+		data[i] = rand(gen);
+
+	// sort it with naive bitonic sort
+	for (int k = 2; k <= n; k *= 2) {
+		// coming back to the host between values of k acts as a barrier
+		// note that in later hardware (compute capabilty >= 7.0), there is a cuda::barrier avaliable
+		bitonic<<<1, MAX_BLOCK_SIZE>>>(data, k);
+	}
+	cudaDeviceSynchronize();
+
+	// print out results
+	for (int i = 0; i < n; i++)
+		if (i < 3 || i >= n - 3 || i % 100 == 0)
+			cout << data[i] << " ";
+		else
+			cout << ".";
+	cout << endl;
+    cudaFree(data);
+	return 0;
+}
