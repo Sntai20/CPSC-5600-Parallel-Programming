@@ -144,7 +144,7 @@ p6/out/p6
 
 ```bash
 mkdir p6/out
-nvcc p6/bitonic_naive.cu -o p6/out/bitonic_native
+nvcc p6/bitonic_naive.cu -o p6/out/bitonic_naive
 p6/out/bitonic_native
 256
 ```
