@@ -65,26 +65,26 @@ void printArray(float *data, int n, string title, int m=5) {
 	cout << endl;
 }
 
-int main(void) {
-	int n;
-	float *data;
-	int threads = MAX_BLOCK_SIZE;
-	cout << "How many data elements? ";
-	cin >> n;
-	if (n > threads) {
-		cerr << "Cannot do more than " << threads << " numbers with this simple algorithm!" << endl;
-		return 1;
-	}
-	cudaMallocManaged(&data, threads * sizeof(*data));
-	fillArray(data, n, threads);
-	printArray(data, n, "Before");
-	allreduce<<<1, threads>>>(data);
-	cudaDeviceSynchronize();
-	printArray(data, n, "Reduce");
-	fillArray(data, n, threads);
-	scan<<<1, threads>>>(data);
-	cudaDeviceSynchronize();
-	printArray(data, n, "Scan");
-	cudaFree(data);
-	return 0;
-}
+// int main(void) {
+// 	int n;
+// 	float *data;
+// 	int threads = MAX_BLOCK_SIZE;
+// 	cout << "How many data elements? ";
+// 	cin >> n;
+// 	if (n > threads) {
+// 		cerr << "Cannot do more than " << threads << " numbers with this simple algorithm!" << endl;
+// 		return 1;
+// 	}
+// 	cudaMallocManaged(&data, threads * sizeof(*data));
+// 	fillArray(data, n, threads);
+// 	printArray(data, n, "Before");
+// 	allreduce<<<1, threads>>>(data);
+// 	cudaDeviceSynchronize();
+// 	printArray(data, n, "Reduce");
+// 	fillArray(data, n, threads);
+// 	scan<<<1, threads>>>(data);
+// 	cudaDeviceSynchronize();
+// 	printArray(data, n, "Scan");
+// 	cudaFree(data);
+// 	return 0;
+// }
