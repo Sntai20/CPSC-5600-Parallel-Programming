@@ -7,7 +7,9 @@ TARGET = $(TARGET_DIR)/p6
 
 # Source files
 SRCS = p6.cu bitonic_naive.cu reduce_scan_1block.cu
-OBJS = $(SRCS:.cu=.o)
+
+# Object files
+OBJS = $(patsubst %.cu, $(TARGET_DIR)/%.o, $(SRCS))
 
 # Header files
 HEADERS = bitonic_naive.h reduce_scan_1block.h
@@ -23,12 +25,12 @@ $(TARGET): $(OBJS)
 	$(NVCC) $(CFLAGS) -o $@ $^
 
 # Target to compile the header files
-%.o: %.cu $(HEADERS)
+$(TARGET_DIR)/%.o: %.cu $(HEADERS)
 	$(NVCC) $(CFLAGS) -c $< -o $@
 
 # Target to clean the directory
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f $(TARGET_DIR)/*.o $(TARGET)
 	rm -rf $(TARGET_DIR)
 
 .PHONY: clean
