@@ -124,6 +124,16 @@ nvcc hello_gpu.cu -o out/hello_gpu
 
 - p6.cu -- A refactored version of the started code with parallelization. The Makefile builds the other files into an executable named p6 if the make p6 command is called.
 
+### Build and Run with Makefile
+
+```bash
+make -C p6
+p6/out/p6
+make -C p6 clean
+```
+
+### Build and Run without Makefile
+
 ```bash
 mkdir p6/out
 nvcc p6/p6.cu -o p6/out/p6

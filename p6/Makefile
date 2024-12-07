@@ -1,7 +1,25 @@
-all: out p6
+# Makefile for compiling p6.cu
 
-out:
-	mkdir out
+# Compiler
+NVCC = nvcc
 
-p6: p6.cu Makefile
-	nvcc p6/p6.cu -o p6/out/p6
+# Source file
+SRC = p6.cu bitonic_naive.cu reduce_scan_1block.cu
+
+# Output directory and file
+OUT_DIR = out
+OUT = $(OUT_DIR)/p6
+
+# Default target
+all: $(OUT)
+
+# Rule to compile the CUDA source file
+$(OUT): $(SRC)
+	@mkdir -p $(OUT_DIR)
+	$(NVCC) $(SRC) -o $(OUT)
+
+# Clean target to remove compiled files
+clean:
+	rm -f $(OUT)
+
+.PHONY: all clean
