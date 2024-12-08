@@ -26,12 +26,12 @@ bool file_utils_read_csv_test(string input_filename) {
     }
 
     // Check if the data values are correct
-    // if (data[0].x != 1.0f || data[0].y != 2.0f || data[0].original_index != 0 ||
-    //     data[1].x != 3.0f || data[1].y != 4.0f || data[1].original_index != 1 ||
-    //     data[2].x != 5.0f || data[2].y != 6.0f || data[2].original_index != 2) {
-    //     cout << "----file_utils_read_csv_test failed ---- Data values are incorrect" << endl;
-    //     return false;
-    // }
+    if (data[0].x != 12.278249f || data[0].y != 1.152063f || data[0].original_index != 0 ||
+        data[1].x != 13.043502f || data[1].y != 0.114110f || data[1].original_index != 1 ||
+        data[2].x != 12.297193f || data[2].y != 1.154309f || data[2].original_index != 2) {
+        cout << "Test failed: file_utils_read_csv_test failed ---- Data values are incorrect." << endl;
+        return false;
+    }
 
     cout << "Test passed: file_utils_read_csv_test works correctly." << endl;
     
@@ -177,6 +177,7 @@ bool file_utils_write_csv_test(string output_filename) {
     return true;
 }
 
+// Run all tests
 bool p6_test() {
     cout << "\n" << endl;
     cout << "Running in test mode" << endl;
