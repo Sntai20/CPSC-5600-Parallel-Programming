@@ -9,20 +9,30 @@ using namespace std;
 const string input_filename_test = "out/test/x_y_16.csv";
 const string output_filename_test = "out/test/x_y_scan_16.csv";
 
-// bool file_utils_read_csv_test(string input_filename) {
-//     cout << "Running file_utils_read_csv_test" << endl;
+bool file_utils_read_csv_test(string input_filename) {
+    cout << "Running file_utils_read_csv_test" << endl;
     
-//     std::vector<std::pair<float, float>> data = read_csv(input_filename);
+    // Call the read_csv function
+    std::vector<X_Y> data = read_csv(input_filename);
 
-//     if (data.size() != 16) {
-//         cout << "----file_utils_read_csv_test failed ---- Expected 16 rows, got " << data.size() << endl;
-//         return false;
-//     }
+    // Check if the data size is correct
+    if (data.size() != 16) {
+        cout << "----file_utils_read_csv_test failed ---- Expected 16 rows, got " << data.size() << endl;
+        return false;
+    }
 
-//     cout << "----file_utils_read_csv_test passed" << endl;
+    // Check if the data values are correct
+    // if (data[0].x != 1.0f || data[0].y != 2.0f || data[0].original_index != 0 ||
+    //     data[1].x != 3.0f || data[1].y != 4.0f || data[1].original_index != 1 ||
+    //     data[2].x != 5.0f || data[2].y != 6.0f || data[2].original_index != 2) {
+    //     cout << "----file_utils_read_csv_test failed ---- Data values are incorrect" << endl;
+    //     return false;
+    // }
+
+    cout << "----file_utils_read_csv_test passed" << endl;
     
-//     return true;
-// }
+    return true;
+}
 
 // bool bitonic_naive_sort_test() {
 //     cout << "Running bitonic_naive_sort_test" << endl;
@@ -72,9 +82,9 @@ bool p6_test() {
     
     cout << "\n" << endl;
     cout << "Running tests" << endl;
-    // if (!file_utils_read_csv_test(input_filename_test)) {
-    //     return false;
-    // }
+    if (!file_utils_read_csv_test(input_filename_test)) {
+        return false;
+    }
 
     // if (!bitonic_naive_sort_test()) {
     //     return false;
