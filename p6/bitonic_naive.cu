@@ -43,6 +43,45 @@ __global__ void bitonic(float *data, int k) {
 	}
 }
 
+__global__ void bitonic_small_j(float *data, int k, int j) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    int ixj = i ^ j;
+    if (ixj > i) {
+        if ((i & k) == 0 && data[i] > data[ixj])
+            swap(data, i, ixj);
+        if ((i & k) != 0 && data[i] < data[ixj])
+            swap(data, i, ixj);
+    }
+    __syncthreads();
+}
+
+__global__ void bitonic_large_j(float *data, int k, int j) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    int ixj = i ^ j;
+    if (ixj > i) {
+        if ((i & k) == 0 && data[i] > data[ixj])
+            swap(data, i, ixj);
+        if ((i & k) != 0 && data[i] < data[ixj])
+            swap(data, i, ixj);
+    }
+}
+
+void bitonic_sort(float *data, int n) {
+    int num_blocks = (n + MAX_BLOCK_SIZE - 1) / MAX_BLOCK_SIZE;
+
+    for (int k = 2; k <= n; k *= 2) {
+        for (int j = k / 2; j > 0; j /= 2) {
+            if (j <= MAX_BLOCK_SIZE) {
+                bitonic_small_j<<<num_blocks, MAX_BLOCK_SIZE>>>(data, k, j);
+                cudaDeviceSynchronize();
+            } else {
+                bitonic_large_j<<<num_blocks, MAX_BLOCK_SIZE>>>(data, k, j);
+                cudaDeviceSynchronize();
+            }
+        }
+    }
+}
+
 int bitonic_naive_sort(int n) {
 	bool is_test = (n =! 0);
 

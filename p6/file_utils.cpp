@@ -46,6 +46,31 @@ std::vector<std::pair<float, float>> read_csv(const std::string& filename) {
     return data;
 }
 
+// Writes the sorted sequence to a new file named x_y_scan.csv with four fields per line, in the following order: x value, y value, cumulative y value, original row number.
+void write_csv(
+    const std::string& filename,
+    const std::vector<std::pair<float, float>>& data,
+    const std::vector<float>& cumulative_y,
+    const std::vector<int>& original_indices) {
+
+    std::ofstream file(filename);
+
+    if (!file.is_open()) {
+        std::cerr << "Error opening file: " << filename << std::endl;
+        return;
+    }
+
+    // Write the header
+    file << "x,y,cumulative_y,original_index\n";
+
+    // Write the data
+    for (size_t i = 0; i < data.size(); ++i) {
+        file << data[i].first << "," << data[i].second << "," << cumulative_y[i] << "," << original_indices[i] << "\n";
+    }
+
+    file.close();
+}
+
 // Get the current working directory
 std::string get_current_directory() {
     return std::filesystem::current_path().string();

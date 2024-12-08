@@ -93,3 +93,84 @@ int reduce_scan_1block(int n) {
 	cudaFree(data);
 	return 0;
 }
+
+__global__ void first_tier_scan(float *data, float *block_sums, int n) {
+    __shared__ float local[MAX_BLOCK_SIZE];
+    int gindex = blockIdx.x * blockDim.x + threadIdx.x;
+    int index = threadIdx.x;
+
+    if (gindex < n) {
+        local[index] = data[gindex];
+    } else {
+        local[index] = 0.0f;
+    }
+
+    for (int stride = 1; stride < blockDim.x; stride *= 2) {
+        __syncthreads();
+        float addend = 0.0f;
+        if (index >= stride) {
+            addend = local[index - stride];
+        }
+        __syncthreads();
+        local[index] += addend;
+    }
+
+    if (gindex < n) {
+        data[gindex] = local[index];
+    }
+
+    if (index == blockDim.x - 1) {
+        block_sums[blockIdx.x] = local[index];
+    }
+}
+
+__global__ void top_tier_scan(float *block_sums, int num_blocks) {
+    __shared__ float local[MAX_BLOCK_SIZE];
+    int index = threadIdx.x;
+
+    if (index < num_blocks) {
+        local[index] = block_sums[index];
+    } else {
+        local[index] = 0.0f;
+    }
+
+    for (int stride = 1; stride < blockDim.x; stride *= 2) {
+        __syncthreads();
+        float addend = 0.0f;
+        if (index >= stride) {
+            addend = local[index - stride];
+        }
+        __syncthreads();
+        local[index] += addend;
+    }
+
+    if (index < num_blocks) {
+        block_sums[index] = local[index];
+    }
+}
+
+__global__ void propagate_prefixes(float *data, float *block_sums, int n) {
+    int gindex = blockIdx.x * blockDim.x + threadIdx.x;
+    if (blockIdx.x > 0 && gindex < n) {
+        data[gindex] += block_sums[blockIdx.x - 1];
+    }
+}
+
+void reduce_scan_1block(float *data, int n) {
+    int num_blocks = (n + MAX_BLOCK_SIZE - 1) / MAX_BLOCK_SIZE;
+    float *block_sums;
+    cudaMalloc(&block_sums, num_blocks * sizeof(float));
+
+    first_tier_scan<<<num_blocks, MAX_BLOCK_SIZE>>>(data, block_sums, n);
+    cudaDeviceSynchronize();
+
+    if (num_blocks > 1) {
+        top_tier_scan<<<1, MAX_BLOCK_SIZE>>>(block_sums, num_blocks);
+        cudaDeviceSynchronize();
+
+        propagate_prefixes<<<num_blocks, MAX_BLOCK_SIZE>>>(data, block_sums, n);
+        cudaDeviceSynchronize();
+    }
+
+    cudaFree(block_sums);
+}
