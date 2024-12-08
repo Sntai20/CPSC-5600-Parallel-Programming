@@ -127,9 +127,10 @@ nvcc hello_gpu.cu -o out/hello_gpu
 ### Build and Run with Makefile
 
 ```bash
-make -C p6
-p6/out/p6
-make -C p6 clean
+cd p6
+make p6
+out/p6
+make clean
 ```
 
 ### Build and Run without Makefile
@@ -137,7 +138,8 @@ make -C p6 clean
 ```bash
 mkdir p6/out
 nvcc p6/p6.cu -o p6/out/p6
-p6/out/p6
+out/p6
+out/p6 test
 ```
 
 - bitonic_naive.cu -- a naive CUDA implementation of bitonic sort, which only sorts arrays up to 1024 elements whose size is a power of 2.
