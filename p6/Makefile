@@ -23,6 +23,9 @@ HEADERS = bitonic_naive.h reduce_scan_1block.h file_utils.h p6_test.h
 # Default target
 all: $(TARGET_DIR) $(TEST_DIR) $(TARGET) copy_test_files
 
+# Makefile should build the other files into an executable named p6 if the make command make p6 is called. 
+p6: $(TARGET_DIR) $(TEST_DIR) $(TARGET) copy_test_files
+
 $(TARGET_DIR):
 	mkdir -p $(TARGET_DIR)
 
