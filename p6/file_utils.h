@@ -6,5 +6,6 @@
 #include <utility>
 
 std::vector<std::pair<float, float>> read_csv(const std::string& filename);
+std::string get_current_directory();
 
 #endif // FILE_UTILS_H

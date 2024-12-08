@@ -43,14 +43,17 @@ __global__ void bitonic(float *data, int k) {
 	}
 }
 
-int bitonic_naive_sort() {
-	int n;
-	cout << "n = ? (must be power of 2): ";
-	cin >> n;
-	if (n > MAX_BLOCK_SIZE || pow(2,floor(log2(n))) != n) {
-		cerr << "n must be power of 2 and <= " << MAX_BLOCK_SIZE << endl;
-		return 1;
-	}
+int bitonic_naive_sort(int n) {
+	bool is_test = (n =! 0);
+
+	if (!is_test) {
+		cout << "n = ? (must be power of 2): ";
+		cin >> n;
+		if (n > MAX_BLOCK_SIZE || pow(2,floor(log2(n))) != n) {
+			cerr << "n must be power of 2 and <= " << MAX_BLOCK_SIZE << endl;
+			return 1;
+		}
+	}	
 
 	// use managed memory for the data array
 	float *data;
@@ -71,13 +74,16 @@ int bitonic_naive_sort() {
 	}
 	cudaDeviceSynchronize();
 
-	// print out results
-	for (int i = 0; i < n; i++)
-		if (i < 3 || i >= n - 3 || i % 100 == 0)
-			cout << data[i] << " ";
-		else
-			cout << ".";
-	cout << endl;
+    if(!is_test) {
+		// print out results
+		for (int i = 0; i < n; i++)
+			if (i < 3 || i >= n - 3 || i % 100 == 0)
+				cout << data[i] << " ";
+			else
+				cout << ".";
+		cout << endl;
+	}
+	
     cudaFree(data);
 	return 0;
 }

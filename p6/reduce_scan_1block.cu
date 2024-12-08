@@ -65,26 +65,31 @@ void printArray(float *data, int n, string title, int m) {
 	cout << endl;
 }
 
-int reduce_scan_1block(void) {
-	int n;
+int reduce_scan_1block(int n) {
+	bool is_test = (n =! 0);
 	float *data;
 	int threads = MAX_BLOCK_SIZE;
-	cout << "How many data elements? ";
-	cin >> n;
+	
+	if (!is_test) {
+		cout << "How many data elements? ";
+		cin >> n;
+	}
+
 	if (n > threads) {
 		cerr << "Cannot do more than " << threads << " numbers with this simple algorithm!" << endl;
 		return 1;
 	}
+	
 	cudaMallocManaged(&data, threads * sizeof(*data));
 	fillArray(data, n, threads);
-	printArray(data, n, "Before");
+	if(!is_test) printArray(data, n, "Before");
 	allreduce<<<1, threads>>>(data);
 	cudaDeviceSynchronize();
-	printArray(data, n, "Reduce");
+	if(!is_test) printArray(data, n, "Reduce");
 	fillArray(data, n, threads);
 	scan<<<1, threads>>>(data);
 	cudaDeviceSynchronize();
-	printArray(data, n, "Scan");
+	if(!is_test) printArray(data, n, "Scan");
 	cudaFree(data);
 	return 0;
 }

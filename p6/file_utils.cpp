@@ -6,6 +6,12 @@
 #include <utility>
 #include <filesystem>
 
+// Read a CSV file with two columns of float values, two fields per line, separated by a comma: the x value and the y value.
+/* Example:
+x,y
+12.278249,1.152063
+13.043502,0.114110
+*/
 std::vector<std::pair<float, float>> read_csv(const std::string& filename) {
     std::vector<std::pair<float, float>> data;
 
@@ -38,4 +44,9 @@ std::vector<std::pair<float, float>> read_csv(const std::string& filename) {
 
     file.close();
     return data;
+}
+
+// Get the current working directory
+std::string get_current_directory() {
+    return std::filesystem::current_path().string();
 }

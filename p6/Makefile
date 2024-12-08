@@ -10,7 +10,7 @@ TEST_DIR = $(TARGET_DIR)/test
 TARGET = $(TARGET_DIR)/p6
 
 # Source files
-SRCS = p6.cu bitonic_naive.cu reduce_scan_1block.cu
+SRCS = p6.cu bitonic_naive.cu reduce_scan_1block.cu p6_test.cu
 CPP_SRCS = file_utils.cpp
 
 # Object files
@@ -18,7 +18,7 @@ OBJS = $(patsubst %.cu, $(TARGET_DIR)/%.o, $(SRCS))
 CPP_OBJS = $(patsubst %.cpp, $(TARGET_DIR)/%.o, $(CPP_SRCS))
 
 # Header files
-HEADERS = bitonic_naive.h reduce_scan_1block.h file_utils.h
+HEADERS = bitonic_naive.h reduce_scan_1block.h file_utils.h p6_test.h
 
 # Default target
 all: $(TARGET_DIR) $(TEST_DIR) $(TARGET) copy_test_files
