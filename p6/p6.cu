@@ -12,7 +12,7 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
     
-    // Determine if the program is running a test
+    // Determine if the program is running a test.
     bool is_test = (argc > 1 && std::string(argv[1]) == "test");
 
     if (!is_test)
@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
         // Reads the input file named x_y.csv, which contains two fields per line: x value, y value.
         std::vector<X_Y> data = read_csv(input_filename);
 
-        // Convert data to X_Y array for CUDA
+        // Convert data to X_Y array for CUDA.
         int n = data.size();
         X_Y *d_data;
         cudaMalloc(&d_data, n * sizeof(X_Y));
@@ -44,7 +44,8 @@ int main(int argc, char *argv[]) {
         reduce_scan_1block(d_y_values, n);
         cudaMemcpy(y_values.data(), d_y_values, n * sizeof(float), cudaMemcpyDeviceToHost);
 
-        // Writes the sorted sequence to a new file named x_y_scan.csv with four fields per line, in the following order: x value, y value, cumulative y value, original row number.
+        // Writes the sorted sequence to a new file named x_y_scan.csv with four fields per line,
+        // in the following order: x value, y value, cumulative y value, original row number.
         write_csv(output_filename, data, y_values);
 
         cudaFree(d_data);

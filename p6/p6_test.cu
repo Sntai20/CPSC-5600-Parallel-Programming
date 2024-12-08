@@ -21,7 +21,7 @@ bool file_utils_read_csv_test(string input_filename) {
 
     // Check if the data size is correct
     if (data.size() != 16) {
-        cout << "Test failed: file_utils_read_csv_test failed ---- Expected 16 rows, got " << data.size() << endl;
+        cout << "Test failed: file_utils_read_csv_test failed ---- Expected 16 rows, got. " << data.size() << endl;
         return false;
     }
 
@@ -75,8 +75,6 @@ bool bitonic_naive_sort_test() {
     } else {
         cout << "Test failed: Data is not sorted correctly." << endl;
     }
-
-    // cout << "----bitonic_naive_sort_test passed" << endl;
     
     return true;
 }

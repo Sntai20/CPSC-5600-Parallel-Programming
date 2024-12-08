@@ -5,10 +5,12 @@
 #include <sstream>
 #include <utility>
 #include <filesystem>
+
 #include "file_utils.h"
 #include "constants.h"
 
-// Read a CSV file with two columns of float values, two fields per line, separated by a comma: the x value and the y value.
+// Read a CSV file with two columns of float values, two fields per line,
+// separated by a comma: the x value and the y value.
 /* Example:
 x,y
 12.278249,1.152063
@@ -49,8 +51,12 @@ std::vector<X_Y> read_csv(const std::string& filename) {
     return data;
 }
 
-// Writes the sorted sequence to a new file named x_y_scan.csv with four fields per line, in the following order: x value, y value, cumulative y value, original row number.
-void write_csv(const std::string& filename, const std::vector<X_Y>& data, const std::vector<float>& cumulative_y) {
+// Writes the sorted sequence to a new file named x_y_scan.csv with four fields per line,
+// in the following order: x value, y value, cumulative y value, original row number.
+void write_csv(
+    const std::string& filename,
+    const std::vector<X_Y>& data,
+    const std::vector<float>& cumulative_y) {
     std::ofstream file(filename);
 
     if (!file.is_open()) {
