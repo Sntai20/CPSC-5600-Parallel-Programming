@@ -19,28 +19,24 @@ int main(int argc, char *argv[]) {
     {
         cout << "Running in normal mode" << endl;
         // Reads the input file named x_y.csv, which contains two fields per line: x value, y value.
-        std::vector<std::pair<float, float>> data = read_csv(input_filename);
+        std::vector<X_Y> data = read_csv(input_filename);
 
-        // Sorts this sequence o (x,y) pairs by their x-values, using a parallel bitonic sort in CUDA.
-        // Convert data to float array for CUDA
+        // Convert data to X_Y array for CUDA
         int n = data.size();
-        float *d_data;
-        cudaMalloc(&d_data, n * sizeof(float));
-        for (int i = 0; i < n; ++i) {
-            d_data[i] = data[i].first; // Assuming we are sorting by x values
-        }
-        cudaMemcpy(d_data, data.data(), n * sizeof(float), cudaMemcpyHostToDevice);
+        X_Y *d_data;
+        cudaMalloc(&d_data, n * sizeof(X_Y));
+        cudaMemcpy(d_data, data.data(), n * sizeof(X_Y), cudaMemcpyHostToDevice);
 
         // Sorts this sequence of (x,y) pairs by their x-values, using a parallel bitonic sort in CUDA.
         bitonic_sort(d_data, n);
 
         // Copy sorted data back to host
-        cudaMemcpy(data.data(), d_data, n * sizeof(float), cudaMemcpyDeviceToHost);
+        cudaMemcpy(data.data(), d_data, n * sizeof(X_Y), cudaMemcpyDeviceToHost);
 
         // Scans the y-values in the sorted sequence using a parallel prefix scan in CUDA.
         std::vector<float> y_values(n);
         for (int i = 0; i < n; ++i) {
-            y_values[i] = data[i].second;
+            y_values[i] = data[i].y;
         }
         float *d_y_values;
         cudaMalloc(&d_y_values, n * sizeof(float));
@@ -48,14 +44,8 @@ int main(int argc, char *argv[]) {
         reduce_scan_1block(d_y_values, n);
         cudaMemcpy(y_values.data(), d_y_values, n * sizeof(float), cudaMemcpyDeviceToHost);
 
-        // Prepare the original indices
-        std::vector<int> original_indices(n);
-        for (int i = 0; i < n; ++i) {
-            original_indices[i] = i;
-        }
-
         // Writes the sorted sequence to a new file named x_y_scan.csv with four fields per line, in the following order: x value, y value, cumulative y value, original row number.
-        write_csv(output_filename, data, y_values, original_indices);
+        write_csv(output_filename, data, y_values);
 
         cudaFree(d_data);
         cudaFree(d_y_values);

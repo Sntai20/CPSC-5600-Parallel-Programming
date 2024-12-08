@@ -9,4 +9,10 @@ const int MAX_BLOCK_SIZE = 1024;
 const std::string input_filename = "out/x_y.csv";
 const std::string output_filename = "out/x_y_scan.csv";
 
+struct X_Y {
+    float x;
+    float y;
+    int original_index;
+};
+
 #endif // CONSTANTS_H
