@@ -75,7 +75,7 @@ void write_csv(
     file.close();
 }
 
-// Get the current working directory
+// Get the current working directory.
 std::string get_current_directory() {
     return std::filesystem::current_path().string();
 }

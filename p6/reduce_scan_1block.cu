@@ -13,6 +13,7 @@
 #include "constants.h"
 using namespace std;
 
+// Reduce the array in place. This is a parallel reduction.
 __global__ void allreduce(float *data) {
 	__shared__ float local[MAX_BLOCK_SIZE]; // 10x faster at least than global memory via data[]
         int gindex = threadIdx.x;
@@ -30,6 +31,7 @@ __global__ void allreduce(float *data) {
 	data[gindex] = local[index]; 
 }
 
+// Scan the array in place. This is a parallel prefix sum.
 __global__ void scan(float *data) {
 	__shared__ float local[MAX_BLOCK_SIZE];
 	int gindex = threadIdx.x;
@@ -48,6 +50,7 @@ __global__ void scan(float *data) {
 	data[gindex] = local[index];
 }
 
+// Fill the array with 1.0, 2.0, 3.0, ... n.  Pad the rest with 0.0.
 void fillArray(float *data, int n, int sz) {
 	for (int i = 0; i < n; i++)
 		data[i] = (float)(i+1); // + (i+1)/1000.0;
@@ -55,6 +58,7 @@ void fillArray(float *data, int n, int sz) {
 		data[i] = 0.0; // pad with 0.0's for addition
 }
 
+// Print the first and last m elements of the array.
 void printArray(float *data, int n, string title, int m) {
 	cout << title << ":";
 	for (int i = 0; i < m; i++)
@@ -65,6 +69,7 @@ void printArray(float *data, int n, string title, int m) {
 	cout << endl;
 }
 
+// Original function that takes user input for the number of data elements.
 int reduce_scan_1block(int n) {
 	bool is_test = (n =! 0);
 	float *data;
@@ -94,6 +99,7 @@ int reduce_scan_1block(int n) {
 	return 0;
 }
 
+// Scans the y-values in the sorted sequence using a parallel prefix scan in CUDA.
 __global__ void first_tier_scan(float *data, float *block_sums, int n) {
     __shared__ float local[MAX_BLOCK_SIZE];
     int gindex = blockIdx.x * blockDim.x + threadIdx.x;
@@ -149,6 +155,7 @@ __global__ void top_tier_scan(float *block_sums, int num_blocks) {
     }
 }
 
+// Propagates the block sums to the data array.
 __global__ void propagate_prefixes(float *data, float *block_sums, int n) {
     int gindex = blockIdx.x * blockDim.x + threadIdx.x;
     if (blockIdx.x > 0 && gindex < n) {
@@ -156,6 +163,7 @@ __global__ void propagate_prefixes(float *data, float *block_sums, int n) {
     }
 }
 
+// Scans the y-values in the sorted sequence using a parallel prefix scan in CUDA.
 void reduce_scan_1block(float *data, int n) {
     int num_blocks = (n + MAX_BLOCK_SIZE - 1) / MAX_BLOCK_SIZE;
     float *block_sums;

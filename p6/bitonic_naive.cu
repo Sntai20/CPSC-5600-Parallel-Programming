@@ -9,12 +9,14 @@
 #include "constants.h"
 using namespace std;
 
+// Swap two elements in the data array.
 __device__ void swap(X_Y *data, int a, int b) {
     X_Y temp = data[a];
     data[a] = data[b];
     data[b] = temp;
 }
 
+// Bitonic sort for j <= MAX_BLOCK_SIZE.
 __global__ void bitonic_small_j(X_Y *data, int k, int j) {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
     int ixj = i ^ j;
@@ -27,6 +29,7 @@ __global__ void bitonic_small_j(X_Y *data, int k, int j) {
     __syncthreads();
 }
 
+// Bitonic sort for j > MAX_BLOCK_SIZE. 
 __global__ void bitonic_large_j(X_Y *data, int k, int j) {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
     int ixj = i ^ j;
@@ -38,6 +41,7 @@ __global__ void bitonic_large_j(X_Y *data, int k, int j) {
     }
 }
 
+// Bitonic sort for n elements.
 void bitonic_sort(X_Y *data, int n) {
     int num_blocks = (n + MAX_BLOCK_SIZE - 1) / MAX_BLOCK_SIZE;
 
