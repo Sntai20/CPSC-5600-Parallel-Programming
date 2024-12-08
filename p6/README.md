@@ -57,6 +57,7 @@ make clean
 
 An example of the expected folder structure after compilining and running the tests.
 
+```text
 ├── bitonic_naive.cu
 ├── bitonic_naive.h
 ├── constants.h
@@ -91,6 +92,7 @@ An example of the expected folder structure after compilining and running the te
     ├── x_y_scan_100.csv
     ├── x_y_scan_16.csv
     └── x_y_scan.csv
+```
 
 ## Profiling
 
