@@ -47,7 +47,7 @@ Running file_utils_write_csv_test
 Test passed: write_csv function works correctly.
 ```
 
-## Clean compilied and test files with Makefile
+## Clean compiled and test files with Makefile
 
 ```bash
 make clean
@@ -55,7 +55,7 @@ make clean
 
 ## p6 folder structure
 
-An example of the expected folder structure after compilining and running the tests.
+An example of the expected folder structure after compiling and running the tests.
 
 ```text
 ├── bitonic_naive.cu
